@@ -1,5 +1,6 @@
 export const errorHandler = (statusCode,message)=> {
-    //error created bu us : a manual error
+    
+    //custom error handler - error created by us : a manual error
     const error = new Error()
     error.statusCode = statusCode;
     error.message = message;
