@@ -20,7 +20,7 @@ export const updateUser = async (req, res, next) => {
             username: req.body.username,
             email: req.body.email,
             password: req.body.password,
-            avavatar: req.body.avatar,
+            avatar: req.body.avatar,
         }
     }, {new: true}) //save the updated details
     
