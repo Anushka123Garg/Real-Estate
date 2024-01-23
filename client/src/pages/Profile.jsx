@@ -16,9 +16,9 @@ export default function Profile() {
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formdata, setFormData] = useState({});
 
-  console.log(formdata);
-  console.log(filePerc);
-  console.log(fileUploadError);
+  // console.log(formdata);
+  // console.log(filePerc);
+  // console.log(fileUploadError);
   // console.log(file);
 
   //firebase storage for uploading image
