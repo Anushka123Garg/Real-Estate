@@ -1,5 +1,6 @@
 import { useSelector } from "react-redux";
 import { useRef, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   getDownloadURL,
   getStorage,
@@ -27,7 +28,7 @@ export default function Profile() {
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
-  const [updateSuccess, setUpdateSuccess] =useState(false); 
+  const [updateSuccess, setUpdateSuccess] = useState(false);
   const dispatch = useDispatch();
 
   // console.log(formdata);
@@ -104,7 +105,7 @@ export default function Profile() {
   };
 
   const handleDeleteUser = async (e) => {
-    try{
+    try {
       dispatch(deleteUserStart());
       const res = await fetch(`/api/user/delete/${currentUser._id}`, {
         method: "DELETE",
@@ -118,25 +119,25 @@ export default function Profile() {
         return;
       }
       dispatch(deleteUserSuccess(data));
-    } catch(error){
+    } catch (error) {
       dispatch(deleteUserFailure(error.message));
     }
   };
 
   const handleSignOut = async () => {
-    try{
+    try {
       dispatch(signOutUserStart());
-      const res = await fetch('/api/auth/signout'); 
+      const res = await fetch("/api/auth/signout");
       const data = await res.json();
-      if(data.success === false){
+      if (data.success === false) {
         dispatch(signOutUserFailure(data.message));
         return;
       }
       dispatch(signOutUserSuccess(data));
-    } catch(error){
-      dispatch(signOutUserFailure(data.message)); 
+    } catch (error) {
+      dispatch(signOutUserFailure(data.message));
     }
-  }
+  };
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7"> Profile </h1>
@@ -194,18 +195,29 @@ export default function Profile() {
 
         <button
           disabled={loading}
-          className='bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:opacity-80'
+          className="bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:opacity-80"
         >
-          {loading ? 'Loading...' : 'Update'}
+          {loading ? "Loading..." : "Update"}
         </button>
+        <Link className="bg-green-700 text-white rounded-lg p-3 uppercase text-center hover:opacity-95"
+        to={"/create-listing"}>Create listing</Link>
       </form>
 
       <div className="flex justify-between mt-5">
-        <span onClick={handleDeleteUser} className="text-red-700 cursor-pointer">Delete Account</span>
-        <span onClick={handleSignOut} className="text-red-700 cursor-pointer">Sign Out</span>
+        <span
+          onClick={handleDeleteUser}
+          className="text-red-700 cursor-pointer"
+        >
+          Delete Account
+        </span>
+        <span onClick={handleSignOut} className="text-red-700 cursor-pointer">
+          Sign Out
+        </span>
       </div>
-      <p className="text-red-700 mt-5">{error ? error: ''} </p>
-      <p className="text-green-700 mt-5">{updateSuccess ? 'User is updated successfully!' : ''} </p>
+      <p className="text-red-700 mt-5">{error ? error : ""} </p>
+      <p className="text-green-700 mt-5">
+        {updateSuccess ? "User is updated successfully!" : ""}{" "}
+      </p>
     </div>
   );
 }
