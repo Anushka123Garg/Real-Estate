@@ -16,8 +16,6 @@ import {
   deleteUserSuccess,
   deleteUserStart,
   signOutUserStart,
-  signOutUserSuccess,
-  signOutUserFailure,
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 
@@ -122,7 +120,7 @@ export default function Profile() {
       }
       dispatch(deleteUserSuccess(data));
     } catch (error) {
-      dispatch(deleteUserFailure(error.message));
+      dispatch(deleteUserFailure(data.message));
     }
   };
 
@@ -132,12 +130,12 @@ export default function Profile() {
       const res = await fetch("/api/auth/signout");
       const data = await res.json();
       if (data.success === false) {
-        dispatch(signOutUserFailure(data.message));
+        dispatch(deleteUserFailure(data.message));
         return;
       }
-      dispatch(signOutUserSuccess(data));
+      dispatch(deleteUserSuccess(data));
     } catch (error) {
-      dispatch(signOutUserFailure(data.message));
+      dispatch(deleteUserFailure(data.message));
     }
   };
   const handleShowListings = async () => {
@@ -156,38 +154,36 @@ export default function Profile() {
   };
   const handleDeleteListings = async (listingId) => {
     try {
-      // setShowListingsError(false);
       const res = await fetch(`/api/listing/delete/${listingId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
       const data = await res.json();
       if (data.success === false) {
-        // setShowListingsError(true);
         console.log(data.message);
         return;
       }
-      setUserListings((prev) => prev.filter((listing) => listing._id !== listingId) //save the data
+      setUserListings(
+        (prev) => prev.filter((listing) => listing._id !== listingId) //save the data
       );
     } catch (error) {
       console.log(error.message);
-      // setShowListingsError(true);
     }
   };
-  const handleEdtListings = async () => {
-    try {
-      setShowListingsError(false);
-      const res = await fetch(`/api/user/listings/${currentUser._id}`);
-      const data = await res.json();
-      if (data.success === false) {
-        setShowListingsError(true);
-        return;
-      }
-      setUserListings(data); //save the data
-    } catch (error) {
-      setShowListingsError(true);
-    }
-  };
-  
+  // const handleEditListings = async () => {
+  //   try {
+  //     setShowListingsError(false);
+  //     const res = await fetch(`/api/user/listings/${currentUser._id}`);
+  //     const data = await res.json();
+  //     if (data.success === false) {
+  //       setShowListingsError(true);
+  //       return;
+  //     }
+  //     setUserListings(data); //save the data
+  //   } catch (error) {
+  //     setShowListingsError(true);
+  //   }
+  // };
+
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7"> Profile </h1>
@@ -303,7 +299,12 @@ export default function Profile() {
               </Link>
 
               <div className="flex flex-col items-center">
-                <button onClick={()=>handleDeleteListings(listing._id)} className="text-red-700 uppercase">Delete</button>
+                <button
+                  onClick={() => handleDeleteListings(listing._id)}
+                  className="text-red-700 uppercase"
+                >
+                  Delete
+                </button>
                 <button className="text-green-700 uppercase">Edit</button>
               </div>
             </div>
