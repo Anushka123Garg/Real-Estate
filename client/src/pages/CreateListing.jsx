@@ -54,7 +54,7 @@ export default function CreateListing() {
         })
         .catch((err) => {
           setImageUploadError("Image upload failed (2 mb max per image)");
-          setUploading(false);
+          setUploading(false); 
         });
     } else {
       setImageUploadError("You can only upload 6 images per listing");
@@ -134,8 +134,8 @@ export default function CreateListing() {
       if (+formData.regularPrice < +formData.discountPrice)
         return setError("Discount Price must be lower than regular Price");
 
-      setLoading(true); //remove the previous error
-      setError(false);
+      setLoading(true); 
+      setError(false);    //remove the previous error
       const res = await fetch("/api/listing/create", {
         method: "POST",
         headers: {
@@ -329,17 +329,17 @@ export default function CreateListing() {
 
           <div className="flex gap-4">
             <input
-              onChange={(e) => setFiles(e.target.files)}
+              onChange={(e) => setFiles(e.target.files)} //choose files to upload
               className="p-3 border border-gray-300 rounded w-full"
               type="file"
               id="images"
               accept="image/*"
               multiple
-            />
+            /> 
             <button
               disabled={uploading}
               type="button"
-              onClick={handleImageSubmit}
+              onClick={handleImageSubmit} 
               className="p-3 text-green-700 border border-green-700 rounded uppercase hover:shadow-lg disabled:opacity-80"
             >
               {uploading ? "Uploading..." : "Upload"}

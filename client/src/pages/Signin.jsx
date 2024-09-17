@@ -8,7 +8,7 @@ export default function Signin() {
   const [formData, setFormData] = useState({});
   const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch(); 
 
   const handleChange = (e) => {
     setFormData({
@@ -85,7 +85,7 @@ export default function Signin() {
       </form>
 
       <div className="flex gap-2 mt-5">
-        <p>Don't have an Account?</p>
+        <p>Dont have an Account?</p>
         <Link to={"/sign-up"}>
           <span className="text-blue-700">Sign Up</span>
         </Link>

@@ -16,9 +16,9 @@ mongoose.connect(process.env.MONGO).then(() => {
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json());  //allow the JSON as input to server, otherwise undefined will come
 
-app.use(cookieParser());
+app.use(cookieParser());  //for getting info from cookie
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000!!!');

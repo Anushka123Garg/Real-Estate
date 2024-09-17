@@ -21,7 +21,7 @@ import { useDispatch } from "react-redux";
 
 export default function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
-  const fileRef = useRef(null);
+  const fileRef = useRef(null); 
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
@@ -66,11 +66,11 @@ export default function Profile() {
       (error) => {
         setFileUploadError(true);
       },
-      () => {
+      () => { //callback function
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
           setFormData({ ...formData, avatar: downloadURL })
         );
-      }
+      } 
     );
   };
 
