@@ -65,11 +65,13 @@ export default function Profile() {
       },
       (error) => {
         setFileUploadError(true);
+        // console.error('Error during upload:', error);
       },
       () => { //callback function
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>{
+          console.log('File available at:', downloadURL)
           setFormData({ ...formData, avatar: downloadURL })
-        );
+        });
       } 
     );
   };
@@ -200,6 +202,7 @@ export default function Profile() {
           src={formData.avatar || currentUser.avatar}
           alt="profile"
           className="rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2"
+          onError={(e) => (e.target.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png")}
         />
         <p className="text-center text-sm">
           {fileUploadError ? (
@@ -275,8 +278,8 @@ export default function Profile() {
       </p>
 
       {userListings && userListings.length > 0 && (
-        <div className="">
-          <h1 className="">Your Listings</h1>
+        <div className="flex flex-col gap-4">
+          <h1 className="text-center mt-7 font-semibold text-2xl">Your Listings</h1>
           {userListings.map((listing) => (
             <div
               key={listing._id}

@@ -9,7 +9,6 @@ import {
   FaBath,
   FaBed,
   FaChair,
-  FaMapMarkedAlt,
   FaMapMarkerAlt,
   FaParking,
   FaShare,
@@ -26,7 +25,7 @@ export default function Listing() {
   const params = useParams();
   const { currentUser } = useSelector((state) => state.user);
 
-  // console.log(currentUser._id, listing?.userRef);
+  console.log(currentUser._id, listing?.userRef);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -48,7 +47,7 @@ export default function Listing() {
       }
     };
     fetchListing();
-  }, [params.listingId]);
+  }, [params.listingId]); //fn will run only when it changes
 
   return (
     <main>
@@ -59,30 +58,37 @@ export default function Listing() {
       {listing && !loading && !error && (
         <div>
           <Swiper navigation>
-            {listing.imageUrls.map((url) => (
-              <SwiperSlide key={url}>
-                <div
-                  className="h-[550px]"
-                  style={{
-                    background: `url(${url}) center no-repeat`,
-                    backgroundSize: "cover",
-                  }}
-                ></div>
-              </SwiperSlide>
-            ))}
+            {listing.imageUrls.map(
+              (
+                url //image slider
+              ) => (
+                <SwiperSlide key={url}>
+                  <div
+                    className="h-[350px]"
+                    style={{
+                      background: `url(${url}) center no-repeat`,
+                      backgroundSize: "cover",
+                    }}
+                  ></div>
+                </SwiperSlide>
+              )
+            )}
           </Swiper>
-          <div className="fixed top-[13%] right-[3%] z-10 border rounded-full w-12 h-12 flex justify-center items-center bg-slate-100 cursor-pointer">
-            <FaShare
-              className="text-slate-500"
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
-                setCopied(true);
-                setTimeout(() => {
-                  setCopied(false);
-                }, 2000);
-              }}
-            />
-          </div>
+          {listing && listing.imageUrls && listing.imageUrls.length > 0 && (
+            <div className="fixed top-[13%] right-[3%] z-10 border rounded-full w-12 h-12 flex justify-center items-center bg-slate-100 cursor-pointer">
+              <FaShare
+                className="text-slate-500"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href); //copies the current page's URL to clipboard
+                  setCopied(true);
+                  setTimeout(() => {
+                    //short delay, reset after 2sec
+                    setCopied(false);
+                  }, 2000);
+                }}
+              />
+            </div>
+          )}
           {copied && (
             <p className="fixed top-[23%] right-[5%] z-10 rounded-md bg-slate-100 p-2">
               Link copied!
@@ -115,27 +121,28 @@ export default function Listing() {
               {listing.description}
             </p>
             <ul className="text-green-900 font-semibold text-sm flex flex-wrap items-center gap-4 sm:gap-6">
-              <li className="flex item-center gap-1 whitespace-nowrap">
+              <li className="flex items-center gap-1 whitespace-nowrap">
                 <FaBed className="text-lg" />
                 {listing.bedrooms > 1
                   ? `${listing.bedrooms} beds `
                   : `${listing.bedrooms} bed `}
               </li>
-              <li className="flex item-center gap-1 whitespace-nowrap">
+              <li className="flex items-center gap-1 whitespace-nowrap">
                 <FaBath className="text-lg" />
                 {listing.bathrooms > 1
                   ? `${listing.bathrooms} baths `
                   : `${listing.bathrooms} bath `}
               </li>
-              <li className="flex item-center gap-1 whitespace-nowrap">
+              <li className="flex items-center gap-1 whitespace-nowrap">
                 <FaParking className="text-lg" />
                 {listing.parking ? "Parking Spot" : "No Parking"}
               </li>
-              <li className="flex item-center gap-1 whitespace-nowrap">
+              <li className="flex items-center gap-1 whitespace-nowrap">
                 <FaChair className="text-lg" />
                 {listing.furnished ? "Furnished" : "Unfurnished"}
               </li>
             </ul>
+
             {currentUser && listing.userRef !== currentUser._id && !contact && (
               <button
                 onClick={() => setContact(true)}
