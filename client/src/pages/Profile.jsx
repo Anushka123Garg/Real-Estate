@@ -21,7 +21,7 @@ import { useDispatch } from "react-redux";
 
 export default function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
-  const fileRef = useRef(null); 
+  const fileRef = useRef(null);
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
@@ -29,6 +29,7 @@ export default function Profile() {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [showListingsError, setShowListingsError] = useState(false);
   const [userListings, setUserListings] = useState([]);
+  const [listingsFetched, setListingsFetched] = useState(false);
   const dispatch = useDispatch();
 
   // console.log(formdata);
@@ -67,12 +68,13 @@ export default function Profile() {
         setFileUploadError(true);
         // console.error('Error during upload:', error);
       },
-      () => { //callback function
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>{
-          console.log('File available at:', downloadURL)
-          setFormData({ ...formData, avatar: downloadURL })
+      () => {
+        //callback function
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          console.log("File available at:", downloadURL);
+          setFormData({ ...formData, avatar: downloadURL });
         });
-      } 
+      }
     );
   };
 
@@ -143,13 +145,17 @@ export default function Profile() {
   const handleShowListings = async () => {
     try {
       setShowListingsError(false);
+      setListingsFetched(true);
       const res = await fetch(`/api/user/listings/${currentUser._id}`);
       const data = await res.json();
+
       if (data.success === false) {
         setShowListingsError(true);
         return;
-      }
-      setUserListings(data); //save the data
+      } 
+      setUserListings(Array.isArray(data) ? data : []);
+
+      // setUserListings(data); //save the data
     } catch (error) {
       setShowListingsError(true);
     }
@@ -202,7 +208,10 @@ export default function Profile() {
           src={formData.avatar || currentUser.avatar}
           alt="profile"
           className="rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2"
-          onError={(e) => (e.target.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png")}
+          onError={(e) =>
+            (e.target.src =
+              "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png")
+          }
         />
         <p className="text-center text-sm">
           {fileUploadError ? (
@@ -277,9 +286,17 @@ export default function Profile() {
         {showListingsError ? "Error Showing Listings" : ""}{" "}
       </p>
 
-      {userListings && userListings.length > 0 && (
+      {listingsFetched && userListings.length === 0 && !showListingsError && (
+        <p className="text-gray-700 text-center mt-5">
+          No listings found!
+        </p>
+      )}
+
+      {userListings.length > 0 && (
         <div className="flex flex-col gap-4">
-          <h1 className="text-center mt-7 font-semibold text-2xl">Your Listings</h1>
+          <h1 className="text-center mt-7 font-semibold text-2xl">
+            Your Listings
+          </h1>
           {userListings.map((listing) => (
             <div
               key={listing._id}
