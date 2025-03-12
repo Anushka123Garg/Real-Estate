@@ -81,6 +81,11 @@ export const getListings = async (req, res, next) => {
     if (parking === undefined || parking === "false") {
       parking = { $in: [false, true] };
     }
+    let balcony = req.query.balcony;
+
+    if (balcony === undefined || balcony === "false") {
+      balcony = { $in: [false, true] };
+    }
     let type = req.query.type;
 
     if (type === undefined || type === "all") {
@@ -96,6 +101,7 @@ export const getListings = async (req, res, next) => {
       name: { $regex: searchTerm, $options: "i" },
       offer,
       furnished,
+      balcony,
       parking,
       type,
     })

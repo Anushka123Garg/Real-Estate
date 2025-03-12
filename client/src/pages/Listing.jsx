@@ -13,6 +13,7 @@ import {
   FaParking,
   FaShare,
 } from "react-icons/fa";
+import { MdBalcony } from "react-icons/md";
 import Contact from "../components/Contact";
 
 export default function Listing() {
@@ -140,6 +141,10 @@ export default function Listing() {
               <li className="flex items-center gap-1 whitespace-nowrap">
                 <FaChair className="text-lg" />
                 {listing.furnished ? "Furnished" : "Unfurnished"}
+              </li>
+              <li className="flex items-center gap-1 whitespace-nowrap">
+                <MdBalcony className="text-lg" />
+                {listing.balcony ? "Balcony" : "No Balcony"}
               </li>
             </ul>
 

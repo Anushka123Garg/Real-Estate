@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ListingItem from "../components/ListingItem";
-import { list } from "postcss";
 
 export default function Search() {
   const navigate = useNavigate();
@@ -12,6 +11,7 @@ export default function Search() {
     type: "all",
     parking: false,
     furnished: false,
+    balcony: false,
     offer: false,
     sort: "created_at",
     order: "desc",
@@ -28,6 +28,7 @@ export default function Search() {
     const typeFromUrl = urlParams.get("type");
     const parkingFromUrl = urlParams.get("parking");
     const furnishedFromUrl = urlParams.get("furnished");
+    const balconyFromUrl = urlParams.get("balcony");
     const offerFromUrl = urlParams.get("offer");
     const sortFromUrl = urlParams.get("sort");
     const orderFromUrl = urlParams.get("order");
@@ -37,6 +38,7 @@ export default function Search() {
       typeFromUrl ||
       parkingFromUrl ||
       furnishedFromUrl ||
+      balconyFromUrl ||
       offerFromUrl ||
       sortFromUrl ||
       orderFromUrl
@@ -46,6 +48,7 @@ export default function Search() {
         type: typeFromUrl || "all",
         parking: parkingFromUrl === "true" ? true : false,
         furnished: furnishedFromUrl === "true" ? true : false,
+        balcony: balconyFromUrl === "true" ? true : false,
         offer: offerFromUrl === "true" ? true : false,
         sort: sortFromUrl || "created_at",
         order: orderFromUrl || "desc",
@@ -85,6 +88,7 @@ export default function Search() {
     if (
       e.target.id === "parking" ||
       e.target.id === "furnished" ||
+      e.target.id === "balcony" ||
       e.target.id === "offer"
     ) {
       setSidebardata({
@@ -113,6 +117,7 @@ export default function Search() {
     urlParams.set("type", sidebardata.type);
     urlParams.set("parking", sidebardata.parking);
     urlParams.set("furnished", sidebardata.furnished);
+    urlParams.set("balcony", sidebardata.balcony);
     urlParams.set("offer", sidebardata.offer);
     urlParams.set("sort", sidebardata.sort);
     urlParams.set("order", sidebardata.order);
@@ -223,6 +228,16 @@ export default function Search() {
                 checked={sidebardata.furnished}
               ></input>
               <span>Furnished</span>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                id="balcony"
+                className="w-5"
+                onChange={handleChange}
+                checked={sidebardata.balcony}
+              ></input>
+              <span>Balcony</span>
             </div>
           </div>
           <div className="flex items-center gap-2">

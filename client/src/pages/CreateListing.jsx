@@ -26,6 +26,7 @@ export default function CreateListing() {
     offer: false,
     parking: false,
     furnished: false,
+    // balcony: false,
   });
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -107,6 +108,7 @@ export default function CreateListing() {
     if (
       e.target.id === "parking" ||
       e.target.id === "furnished" ||
+      e.target.id === "balcony" ||
       e.target.id === "offer"
     ) {
       setFormData({
@@ -241,6 +243,17 @@ export default function CreateListing() {
                 checked={formData.furnished}
               />
               <span>Furnished</span>
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                id="balcony"
+                className="w-5"
+                onChange={handleChange}
+                checked={formData.balcony}
+              />
+              <span>Balcony</span>
             </div>
 
             <div className="flex gap-2">

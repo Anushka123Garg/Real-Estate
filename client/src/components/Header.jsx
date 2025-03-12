@@ -70,7 +70,7 @@ export default function Header() {
                 alt="profile"
               />
             ) : (
-              <li className="text-slate-700 hover:underline">Sign In</li>
+              <li className="hidden sm:inline text-white hover:underline">Sign In</li>
             )}
           </Link>
         </ul>

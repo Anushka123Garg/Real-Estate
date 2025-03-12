@@ -6,11 +6,20 @@ import authRouter from './routes/auth.route.js';
 import listingRouter from './routes/listing.route.js';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import Listing from './models/listing.model.js';
+
 
 dotenv.config();
 
-mongoose.connect(process.env.MONGO).then(() => {
+mongoose.connect(process.env.MONGO).then(async () => {
     console.log("Connected to MongoDB!");
+
+    const result = await Listing.updateMany(
+        { balcony: { $exists: false } }, 
+        { $set: { balcony: false } } 
+    );
+    console.log(`Updated ${result.modifiedCount} listings to include 'balcony' field.`);
+
     }).catch ((err) => {
         console.log(err);
     });
