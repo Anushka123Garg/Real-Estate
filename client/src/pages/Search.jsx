@@ -9,6 +9,7 @@ export default function Search() {
   const [sidebardata, setSidebardata] = useState({
     searchTerm: "",
     type: "all",
+    propertyType: "all",
     parking: false,
     furnished: false,
     balcony: false,
@@ -26,6 +27,7 @@ export default function Search() {
     const urlParams = new URLSearchParams(location.search);
     const searchTermFromUrl = urlParams.get("searchTerm");
     const typeFromUrl = urlParams.get("type");
+    const propertyTypeFromUrl = urlParams.get("propertyType");
     const parkingFromUrl = urlParams.get("parking");
     const furnishedFromUrl = urlParams.get("furnished");
     const balconyFromUrl = urlParams.get("balcony");
@@ -36,6 +38,7 @@ export default function Search() {
     if (
       searchTermFromUrl ||
       typeFromUrl ||
+      propertyTypeFromUrl ||
       parkingFromUrl ||
       furnishedFromUrl ||
       balconyFromUrl ||
@@ -46,6 +49,7 @@ export default function Search() {
       setSidebardata({
         searchTerm: searchTermFromUrl || "",
         type: typeFromUrl || "all",
+        propertyType: propertyTypeFromUrl || "all",
         parking: parkingFromUrl === "true" ? true : false,
         furnished: furnishedFromUrl === "true" ? true : false,
         balcony: balconyFromUrl === "true" ? true : false,
@@ -82,8 +86,15 @@ export default function Search() {
     ) {
       setSidebardata({ ...sidebardata, type: e.target.id });
     }
+    if (e.target.id === "propertyType") {
+      setSidebardata({ ...sidebardata, propertyType: e.target.value });
+    }
+    
     if (e.target.id === "searchTerm") {
       setSidebardata({ ...sidebardata, searchTerm: e.target.value });
+    }
+    if (e.target.id === "city") {
+      setSidebardata({ ...sidebardata, city: e.target.value });
     }
     if (
       e.target.id === "parking" ||
@@ -115,6 +126,7 @@ export default function Search() {
     const urlParams = new URLSearchParams();
     urlParams.set("searchTerm", sidebardata.searchTerm);
     urlParams.set("type", sidebardata.type);
+    urlParams.set("propertyType", sidebardata.propertyType);
     urlParams.set("parking", sidebardata.parking);
     urlParams.set("furnished", sidebardata.furnished);
     urlParams.set("balcony", sidebardata.balcony);
@@ -203,6 +215,32 @@ export default function Search() {
               ></input>
               <span>Offer</span>
             </div>
+          </div>
+
+          {/* <div className="flex items-center gap-2">
+            <label className="whitespace-nowrap font-semibold">City:</label>
+            <input
+              type="text"
+              id="city"
+              placeholder="Enter city..."
+              className="border rounded-lg p-3 w-full"
+              value={sidebardata.city}
+              onChange={handleChange}
+            />
+          </div> */}
+
+          <div className="flex items-center gap-2">
+            <label className="font-semibold">Property Type:</label>
+            <select
+              id="propertyType"
+              onChange={handleChange}
+              value={sidebardata.propertyType}
+              className="border rounded-lg p-3"
+            >
+              <option value="all">All</option>
+              <option value="residential">Residential</option>
+              <option value="commercial">Commercial</option>
+            </select>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

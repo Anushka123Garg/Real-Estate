@@ -91,6 +91,13 @@ export const getListings = async (req, res, next) => {
     if (type === undefined || type === "all") {
       type = { $in: ["sale", "rent"] };
     }
+    let propertyFilter = {};
+    if (req.query.propertyType === "residential") {
+      propertyFilter = { description: { $regex: /(duplex|apartment|villa|bungalow|residential|home|house)/i } };
+    } else if (req.query.propertyType === "commercial") {
+      propertyFilter = { description: { $regex: /(office|shop|warehouse|commercial)/i } };
+    }
+
     const searchTerm = req.query.searchTerm || "";
 
     const sort = req.query.sort || "createdAt";
@@ -104,6 +111,7 @@ export const getListings = async (req, res, next) => {
       balcony,
       parking,
       type,
+      ...propertyFilter,
     })
       .sort({ [sort]: order })
       .limit(limit)
