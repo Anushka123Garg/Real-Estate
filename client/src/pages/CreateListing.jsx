@@ -17,7 +17,10 @@ export default function CreateListing() {
     imageUrls: [],
     name: "",
     description: "",
-    address: "",
+    city: "",
+    state: "",
+    street: "",
+    pincode: "",
     type: "rent",
     bedrooms: 1,
     bathrooms: 1,
@@ -26,7 +29,7 @@ export default function CreateListing() {
     offer: false,
     parking: false,
     furnished: false,
-    // balcony: false,
+    balcony: false,
   });
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -192,12 +195,39 @@ export default function CreateListing() {
 
           <input
             type="text"
-            placeholder="Address"
+            placeholder="Street"
             className="border p-3 rounded-lg"
-            id="address"
+            id="street"
             required
             onChange={handleChange}
-            value={formData.address}
+            value={formData.street}
+          />
+          <input
+            type="text"
+            placeholder="City"
+            className="border p-3 rounded-lg"
+            id="city"
+            required
+            onChange={handleChange}
+            value={formData.city}
+          />
+          <input
+            type="text"
+            placeholder="State"
+            className="border p-3 rounded-lg"
+            id="state"
+            required
+            onChange={handleChange}
+            value={formData.state}
+          />
+          <input
+            type="text"
+            placeholder="Pincode"
+            className="border p-3 rounded-lg"
+            id="pincode"
+            required
+            onChange={handleChange}
+            value={formData.pincode}
           />
 
           <div className="flex gap-6 flex-wrap">

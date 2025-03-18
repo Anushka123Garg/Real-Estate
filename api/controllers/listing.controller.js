@@ -98,6 +98,8 @@ export const getListings = async (req, res, next) => {
       propertyFilter = { description: { $regex: /(office|shop|warehouse|commercial)/i } };
     }
 
+    const cityFilter = req.query.city ? { city: { $regex: req.query.city, $options: "i" } } : {};
+
     const searchTerm = req.query.searchTerm || "";
 
     const sort = req.query.sort || "createdAt";
@@ -111,6 +113,7 @@ export const getListings = async (req, res, next) => {
       balcony,
       parking,
       type,
+      ...cityFilter,
       ...propertyFilter,
     })
       .sort({ [sort]: order })

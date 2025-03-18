@@ -18,7 +18,10 @@ export default function CreateListing() {
     imageUrls: [],
     name: "",
     description: "",
-    address: "",
+    street: "",
+    city: "",
+    state: "",
+    pincode: "",
     type: "rent",
     bedrooms: 1,
     bathrooms: 1,
@@ -205,14 +208,41 @@ export default function CreateListing() {
             value={formData.description}
           />
 
-          <input
+<input
             type="text"
-            placeholder="Address"
+            placeholder="Street"
             className="border p-3 rounded-lg"
-            id="address"
+            id="street"
             required
             onChange={handleChange}
-            value={formData.address}
+            value={formData.street}
+          />
+          <input
+            type="text"
+            placeholder="City"
+            className="border p-3 rounded-lg"
+            id="city"
+            required
+            onChange={handleChange}
+            value={formData.city}
+          />
+          <input
+            type="text"
+            placeholder="State"
+            className="border p-3 rounded-lg"
+            id="state"
+            required
+            onChange={handleChange}
+            value={formData.state}
+          />
+          <input
+            type="text"
+            placeholder="Pincode"
+            className="border p-3 rounded-lg"
+            id="pincode"
+            required
+            onChange={handleChange}
+            value={formData.pincode}
           />
 
           <div className="flex gap-6 flex-wrap">
@@ -293,7 +323,7 @@ export default function CreateListing() {
                 required
                 className="p-3 border-gray-300 rounded-lg"
                 onChange={handleChange}
-                checked={formData.bedrooms}
+                value={formData.bedrooms || ""}
               />
               <p>Beds</p>
             </div>
@@ -306,7 +336,7 @@ export default function CreateListing() {
                 required
                 className="p-3 border-gray-300 rounded-lg"
                 onChange={handleChange}
-                checked={formData.bathrooms}
+                value={formData.bathrooms || ""}
               />
               <p>Baths</p>
             </div>
@@ -319,7 +349,7 @@ export default function CreateListing() {
                 required
                 className="p-3 border-gray-300 rounded-lg"
                 onChange={handleChange}
-                checked={formData.regularPrice}
+                value={formData.regularPrice || ""}
               />
               <div className="flex flex-col items-center">
                 <p>Regular Price</p>
@@ -336,7 +366,7 @@ export default function CreateListing() {
                   required
                   className="p-3 border-gray-300 rounded-lg"
                   onChange={handleChange}
-                  checked={formData.discountPrice}
+                  value={formData.discountPrice}
                 />
                 <div className="flex flex-col items-center">
                   <p>Discounted Price</p>

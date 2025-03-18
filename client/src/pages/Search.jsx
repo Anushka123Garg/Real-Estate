@@ -9,6 +9,7 @@ export default function Search() {
   const [sidebardata, setSidebardata] = useState({
     searchTerm: "",
     type: "all",
+    city: "",
     propertyType: "all",
     parking: false,
     furnished: false,
@@ -27,6 +28,7 @@ export default function Search() {
     const urlParams = new URLSearchParams(location.search);
     const searchTermFromUrl = urlParams.get("searchTerm");
     const typeFromUrl = urlParams.get("type");
+    const cityFromUrl = urlParams.get("city");
     const propertyTypeFromUrl = urlParams.get("propertyType");
     const parkingFromUrl = urlParams.get("parking");
     const furnishedFromUrl = urlParams.get("furnished");
@@ -38,6 +40,7 @@ export default function Search() {
     if (
       searchTermFromUrl ||
       typeFromUrl ||
+      cityFromUrl ||
       propertyTypeFromUrl ||
       parkingFromUrl ||
       furnishedFromUrl ||
@@ -49,6 +52,7 @@ export default function Search() {
       setSidebardata({
         searchTerm: searchTermFromUrl || "",
         type: typeFromUrl || "all",
+        city: cityFromUrl || "all",
         propertyType: propertyTypeFromUrl || "all",
         parking: parkingFromUrl === "true" ? true : false,
         furnished: furnishedFromUrl === "true" ? true : false,
@@ -126,6 +130,7 @@ export default function Search() {
     const urlParams = new URLSearchParams();
     urlParams.set("searchTerm", sidebardata.searchTerm);
     urlParams.set("type", sidebardata.type);
+    urlParams.set("city", sidebardata.city);
     urlParams.set("propertyType", sidebardata.propertyType);
     urlParams.set("parking", sidebardata.parking);
     urlParams.set("furnished", sidebardata.furnished);
@@ -217,7 +222,7 @@ export default function Search() {
             </div>
           </div>
 
-          {/* <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <label className="whitespace-nowrap font-semibold">City:</label>
             <input
               type="text"
@@ -227,7 +232,7 @@ export default function Search() {
               value={sidebardata.city}
               onChange={handleChange}
             />
-          </div> */}
+          </div>
 
           <div className="flex items-center gap-2">
             <label className="font-semibold">Property Type:</label>
