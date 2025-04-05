@@ -91,14 +91,18 @@ export const getListings = async (req, res, next) => {
     if (type === undefined || type === "all") {
       type = { $in: ["sale", "rent"] };
     }
-    let propertyFilter = {};
-    if (req.query.propertyType === "residential") {
-      propertyFilter = { description: { $regex: /(duplex|apartment|villa|bungalow|residential|home|house)/i } };
-    } else if (req.query.propertyType === "commercial") {
-      propertyFilter = { description: { $regex: /(office|shop|warehouse|commercial)/i } };
-    }
 
-    const cityFilter = req.query.city ? { city: { $regex: req.query.city, $options: "i" } } : {};
+    const propertyTypeFilter = req.query.propertyType && req.query.propertyType.toLowerCase() !== "all"
+      ? { propertyType: { $regex: `^${req.query.propertyType}$`, $options: "i" } }
+      : {};
+
+    const subTypeFilter = req.query.subType && req.query.subType.toLowerCase() !== "all"
+      ? { subType: { $regex: `^${req.query.subType}$`, $options: "i" } }
+      : {};
+
+    const cityFilter = req.query.city && req.query.city.toLowerCase() !== "all"
+    ? { city: { $regex: `^${req.query.city}$`, $options: "i" } }
+    : {};
 
     const searchTerm = req.query.searchTerm || "";
 
@@ -114,11 +118,16 @@ export const getListings = async (req, res, next) => {
       parking,
       type,
       ...cityFilter,
-      ...propertyFilter,
+      ...propertyTypeFilter,
+      ...subTypeFilter,
     })
       .sort({ [sort]: order })
       .limit(limit)
       .skip(startIndex);
+
+      console.log("Query Filters:", { propertyTypeFilter, subTypeFilter });
+
+      console.log("Fetched Listings from DB:", listings);
 
     return res.status(200).json(listings);
   } catch (error) {

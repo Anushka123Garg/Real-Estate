@@ -22,6 +22,8 @@ export default function CreateListing() {
     city: "",
     state: "",
     pincode: "",
+    propertyType: "",
+    subType: "",
     type: "rent",
     bedrooms: 1,
     bathrooms: 1,
@@ -32,6 +34,10 @@ export default function CreateListing() {
     furnished: false,
     balcony: false,
   });
+
+  const residentialSubtypes = ["Apartment/Flat", "Villa", "Independent House", "PG/Co-Living", "FarmHouse"];
+  const commercialSubtypes = ["Office Space", "Shop", "Warehouse", "Plots/Land", "Industry/Factory"];
+
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(false);
@@ -144,6 +150,12 @@ export default function CreateListing() {
         [e.target.id]: e.target.value,
       });
     }
+    if (id === "propertyType") {
+      setFormData({ ...formData, propertyType: value, subType: "" }); 
+    } 
+    if (id === "subType") {
+      setFormData({ ...formData, subType: value });
+    }
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -208,7 +220,39 @@ export default function CreateListing() {
             value={formData.description}
           />
 
-<input
+<select
+            id="propertyType"
+            className="border p-3 rounded-lg"
+            value={formData.propertyType}
+            onChange={handleChange}
+          >
+            <option value="" disabled>Select Property Type</option>
+            <option value="Residential">Residential</option>
+            <option value="Commercial">Commercial</option>
+          </select>
+
+          <select
+            id="subType"
+            className="border p-3 rounded-lg"
+            value={formData.subType}
+            onChange={handleChange}
+            required
+          >
+            <option value="" disabled>Select Subtype</option>
+            {formData.propertyType === "Residential"
+              ? residentialSubtypes.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub}
+                  </option>
+                ))
+              : commercialSubtypes.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub}
+                  </option>
+                ))}
+            </select>
+
+          <input
             type="text"
             placeholder="Street"
             className="border p-3 rounded-lg"

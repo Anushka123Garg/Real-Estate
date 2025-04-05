@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ListingItem from "../components/ListingItem";
 
 export default function Search() {
@@ -10,7 +10,8 @@ export default function Search() {
     searchTerm: "",
     type: "all",
     city: "",
-    propertyType: "all",
+    propertyType: "",
+    subType: "",
     parking: false,
     furnished: false,
     balcony: false,
@@ -30,6 +31,7 @@ export default function Search() {
     const typeFromUrl = urlParams.get("type");
     const cityFromUrl = urlParams.get("city");
     const propertyTypeFromUrl = urlParams.get("propertyType");
+    const subTypeFromUrl = urlParams.get("subType");
     const parkingFromUrl = urlParams.get("parking");
     const furnishedFromUrl = urlParams.get("furnished");
     const balconyFromUrl = urlParams.get("balcony");
@@ -42,6 +44,7 @@ export default function Search() {
       typeFromUrl ||
       cityFromUrl ||
       propertyTypeFromUrl ||
+      subTypeFromUrl ||
       parkingFromUrl ||
       furnishedFromUrl ||
       balconyFromUrl ||
@@ -54,6 +57,7 @@ export default function Search() {
         type: typeFromUrl || "all",
         city: cityFromUrl || "all",
         propertyType: propertyTypeFromUrl || "all",
+        subType: subTypeFromUrl || "all",
         parking: parkingFromUrl === "true" ? true : false,
         furnished: furnishedFromUrl === "true" ? true : false,
         balcony: balconyFromUrl === "true" ? true : false,
@@ -66,8 +70,15 @@ export default function Search() {
     const fetchListings = async () => {
       setLoading(true);
       const searchQuery = urlParams.toString();
+      // console.log("Search Query:", searchQuery);
+
       const res = await fetch(`/api/listing/get?${searchQuery}`);
       const data = await res.json();
+
+      console.log("API Response:", data);
+      console.log("Type of listings:", typeof data);
+
+
       if (data.length > 8) {
         setShowMore(true);
       }
@@ -75,12 +86,14 @@ export default function Search() {
         setShowMore(false);
       }
       setListings(data);
+
+      console.log("Type off listings:", typeof data);
       setLoading(false);
     };
 
     fetchListings();
   }, [location.search]);
-  //   console.log(sidebardata);
+    console.log(sidebardata);
 
   const handleChange = (e) => {
     if (
@@ -93,7 +106,9 @@ export default function Search() {
     if (e.target.id === "propertyType") {
       setSidebardata({ ...sidebardata, propertyType: e.target.value });
     }
-    
+    if (e.target.id === "subType") {
+      setSidebardata({ ...sidebardata, subType: e.target.value });
+    }
     if (e.target.id === "searchTerm") {
       setSidebardata({ ...sidebardata, searchTerm: e.target.value });
     }
@@ -132,6 +147,7 @@ export default function Search() {
     urlParams.set("type", sidebardata.type);
     urlParams.set("city", sidebardata.city);
     urlParams.set("propertyType", sidebardata.propertyType);
+    urlParams.set("subType", sidebardata.subType);
     urlParams.set("parking", sidebardata.parking);
     urlParams.set("furnished", sidebardata.furnished);
     urlParams.set("balcony", sidebardata.balcony);
@@ -172,6 +188,50 @@ export default function Search() {
               value={sidebardata.searchTerm}
               onChange={handleChange}
             ></input>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="font-semibold">Property Type:</label>
+            <select
+              id="propertyType"
+              onChange={handleChange}
+              value={sidebardata.propertyType}
+              className="border rounded-lg p-3"
+            >
+              <option value="all">All</option>
+              <option value="residential">Residential</option>
+              <option value="commercial">Commercial</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="font-semibold">Subtype:</label>
+            <select
+              id="subType"
+              onChange={handleChange}
+              value={sidebardata.subType}
+              className="border rounded-lg p-3"
+            >
+              <option value="">All</option>
+              {sidebardata.propertyType === "residential" && (
+                <>
+                  <option value="Apartment/Flat">Apartment/Flat</option>
+                  <option value="Villa">Villa</option>
+                  <option value="Independent House">Independent House</option>
+                  <option value="PG/Co-Living">PG/Co-Living</option>
+                  <option value="FarmHouse">FarmHouse</option>
+                </>
+              )}
+              {sidebardata.propertyType === "commercial" && (
+                <>
+                  <option value="Office Space">Office Space</option>
+                  <option value="Shop">Shop</option>
+                  <option value="Warehouse">Warehouse</option>
+                  <option value="Plots/Land">Plots/Land</option>
+                  <option value="Industry/Factory">Industry/Factory</option>
+                </>
+              )}
+            </select>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -234,20 +294,6 @@ export default function Search() {
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <label className="font-semibold">Property Type:</label>
-            <select
-              id="propertyType"
-              onChange={handleChange}
-              value={sidebardata.propertyType}
-              className="border rounded-lg p-3"
-            >
-              <option value="all">All</option>
-              <option value="residential">Residential</option>
-              <option value="commercial">Commercial</option>
-            </select>
-          </div>
-
           <div className="flex flex-wrap items-center gap-2">
             <label className="font-semibold">Amenities:</label>
 
@@ -307,6 +353,7 @@ export default function Search() {
         <h1 className="text-3xl font-semibold brder-b p-3 text-slate-700 mt-5">
           Listing Results
         </h1>
+        
         <div className="p-7 flex flex-wrap gap-4">
           {!loading && listings.length === 0 && (
             <p className="text-xl text-slate-700">No listing found!</p>
@@ -317,10 +364,9 @@ export default function Search() {
             </p>
           )}
           {!loading &&
-            listings &&
-            listings.map((listing) => (
+            listings && listings.map((listing) => (
               <ListingItem key={listing._id} listing={listing} />
-            ))}
+            ))} 
 
           {showMore && (
             <button

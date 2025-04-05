@@ -22,6 +22,8 @@ export default function CreateListing() {
     street: "",
     pincode: "",
     type: "rent",
+    propertyType: "",
+    subType: "",
     bedrooms: 1,
     bathrooms: 1,
     regularPrice: 0,
@@ -31,6 +33,9 @@ export default function CreateListing() {
     furnished: false,
     balcony: false,
   });
+  const residentialSubtypes = ["Apartment/Flat", "Villa", "Independent House", "PG/Co-Living", "FarmHouse"];
+  const commercialSubtypes = ["Office Space", "Shop", "Warehouse", "Plots/Land", "Industry/Factory"];
+
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(false);
@@ -102,32 +107,40 @@ export default function CreateListing() {
   };
 
   const handleChange = (e) => {
-    if (e.target.id === "sale" || e.target.id === "rent") {
+    const { id, value, type, checked } = e.target;
+
+    if (id === "sale" || id === "rent") {
       setFormData({
         ...formData,
         type: e.target.id,
       });
     }
     if (
-      e.target.id === "parking" ||
-      e.target.id === "furnished" ||
-      e.target.id === "balcony" ||
-      e.target.id === "offer"
+      id === "parking" ||
+      id === "furnished" ||
+      id === "balcony" ||
+      id === "offer"
     ) {
       setFormData({
         ...formData,
-        [e.target.id]: e.target.checked,
+        [id]: checked,
       });
     }
     if (
-      e.target.type === "number" ||
-      e.target.type === "text" ||
-      e.target.type === "textarea"
+      type === "number" ||
+      type === "text" ||
+      type === "textarea"
     ) {
       setFormData({
         ...formData,
-        [e.target.id]: e.target.value,
+        [id]: value,
       });
+    }
+    if (id === "propertyType") {
+      setFormData({ ...formData, propertyType: value, subType: "" }); 
+    } 
+    if (id === "subType") {
+      setFormData({ ...formData, subType: value });
     }
   };
   const handleSubmit = async (e) => {
@@ -192,6 +205,38 @@ export default function CreateListing() {
             onChange={handleChange}
             value={formData.description}
           />
+
+          <select
+            id="propertyType"
+            className="border p-3 rounded-lg"
+            value={formData.propertyType}
+            onChange={handleChange}
+          >
+            <option value="" disabled>Select Property Type</option>
+            <option value="Residential">Residential</option>
+            <option value="Commercial">Commercial</option>
+          </select>
+
+          <select
+            id="subType"
+            className="border p-3 rounded-lg"
+            value={formData.subType}
+            onChange={handleChange}
+            required
+          >
+            <option value="" disabled>Select Subtype</option>
+            {formData.propertyType === "Residential"
+              ? residentialSubtypes.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub}
+                  </option>
+                ))
+              : commercialSubtypes.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub}
+                  </option>
+                ))}
+            </select>
 
           <input
             type="text"
@@ -297,7 +342,9 @@ export default function CreateListing() {
               <span>Offer</span>
             </div>
           </div>
+        </div>
 
+        <div className="flex flex-col flex-1 gap-4">
           <div className="flex gap-6 flex-wrap">
             <div className="flex items-center gap-2">
               <input
@@ -360,10 +407,8 @@ export default function CreateListing() {
               </div>
             )}
           </div>
-        </div>
 
-        <div className="flex flex-col flex-1 gap-4">
-          <p className="font-semibold">
+          <p className="font-semibold mt-4">
             Images:
             <span className="font-normal text-gray-600 ml-2">
               The first image will be the cover (max 6)
