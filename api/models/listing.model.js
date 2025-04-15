@@ -18,6 +18,9 @@ const listingschema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        subSubType: {
+            type: String,
+        },
         regularPrice: {
             type: Number,
             required: true,

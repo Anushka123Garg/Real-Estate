@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   getDownloadURL,
   getStorage,
@@ -24,6 +25,7 @@ export default function CreateListing() {
     pincode: "",
     propertyType: "",
     subType: "",
+    subSubType: "",
     type: "rent",
     bedrooms: 1,
     bathrooms: 1,
@@ -35,8 +37,40 @@ export default function CreateListing() {
     balcony: false,
   });
 
-  const residentialSubtypes = ["Apartment/Flat", "Villa", "Independent House", "PG/Co-Living", "FarmHouse"];
-  const commercialSubtypes = ["Office Space", "Shop", "Warehouse", "Plots/Land", "Industry/Factory"];
+  const residentialSubtypes = [
+    "Apartment/Flat",
+    "Independent House/ Villa",
+    "Builder Floor",
+    "PG/Co-Living",
+    "1 RK/ Studio Apartment",
+    "Serviced Apartment",
+    "Farmhouse",
+    "Other",
+  ];
+  const commercialSubtypes = [
+    "Office",
+    "Retail",
+    "Plots/ Land",
+    "Storage",
+    "Industry",
+    "Hospitality",
+    "Other",
+  ];
+
+  const subSubTypeOptions = {
+    Office: [
+      "Ready to Move Space",
+      "Bare Shell Office Space",
+      "Co-working Space",
+      "Business Center",
+    ],
+    Retail: ["Showrooms", "Shops"],
+    Land: ["Commercial Land", "Agricultural Land", "Industrial Land/ Plots"],
+    Storage: ["Warehouse", "Cold Storage", "Self Storage"],
+    Industry: ["Factory", "Manufacturing"],
+    Hospitality: ["Hotel/ Resort", "Banquet Halls", "Guest House"],
+    "Apartment/Flat": ["1 BHK", "2 BHK", "3 BHK", "4+ BHK"],
+  };
 
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -45,15 +79,16 @@ export default function CreateListing() {
 
   // console.log(formData);
   useEffect(() => {
-    const fetchListing = async () => {    //asynchronous function
+    const fetchListing = async () => {
+      //asynchronous function
       const listingId = params.listingId;
       // console.log(listingId);
       const res = await fetch(`/api/listing/get/${listingId}`);
       const data = await res.json();
-       if(data.success === false){
+      if (data.success === false) {
         console.log(data.message);
         return;
-       }
+      }
       setFormData(data);
     };
     fetchListing(); //fetched the listing by id
@@ -151,12 +186,48 @@ export default function CreateListing() {
       });
     }
     if (id === "propertyType") {
-      setFormData({ ...formData, propertyType: value, subType: "" }); 
-    } 
+      setFormData({
+        ...formData,
+        propertyType: value,
+        subType: "",
+        subSubType: "",
+      });
+    }
     if (id === "subType") {
-      setFormData({ ...formData, subType: value });
+      setFormData({ ...formData, subType: value, subSubType: "" });
+    }
+    if (id === "subSubType") {
+      setFormData({ ...formData, subSubType: value, subSubType: "" });
     }
   };
+
+  const fetchAddressDetails = async () => {
+    if (!formData.pincode || formData.pincode.length < 6) {
+      return alert("Please enter a valid pincode before fetching address.");
+    }
+  
+    try {
+      const response = await axios.get(`https://api.postalpincode.in/pincode/${formData.pincode}`);
+  
+      if (response.data && response.data[0].PostOffice && response.data[0].PostOffice[0]) {
+        const place = response.data[0].PostOffice[0];
+        const city = place.District; 
+        const state = place.State;
+        
+        setFormData((prev) => ({
+          ...prev,
+          city: city || "",
+          state: state || "",
+        }));
+      } else {
+        alert("Could not fetch city/state from the given pincode. Please fill manually.");
+      }
+    } catch (error) {
+      console.error("Error fetching address:", error);
+      alert("Failed to fetch address. Please check your pincode or try again later.");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -220,13 +291,15 @@ export default function CreateListing() {
             value={formData.description}
           />
 
-<select
+          <select
             id="propertyType"
             className="border p-3 rounded-lg"
             value={formData.propertyType}
             onChange={handleChange}
           >
-            <option value="" disabled>Select Property Type</option>
+            <option value="" disabled>
+              Select Property Type
+            </option>
             <option value="Residential">Residential</option>
             <option value="Commercial">Commercial</option>
           </select>
@@ -238,7 +311,9 @@ export default function CreateListing() {
             onChange={handleChange}
             required
           >
-            <option value="" disabled>Select Subtype</option>
+            <option value="" disabled>
+              Select Subtype
+            </option>
             {formData.propertyType === "Residential"
               ? residentialSubtypes.map((sub) => (
                   <option key={sub} value={sub}>
@@ -250,7 +325,26 @@ export default function CreateListing() {
                     {sub}
                   </option>
                 ))}
+          </select>
+
+          {subSubTypeOptions[formData.subType] && (
+            <select
+              id="subSubType"
+              className="border p-3 rounded-lg"
+              value={formData.subSubType}
+              onChange={handleChange}
+              required={!!subSubTypeOptions[formData.subType]}
+            >
+              <option value="" disabled>
+                Select {formData.subType} Subtype
+              </option>
+              {subSubTypeOptions[formData.subType].map((sub) => (
+                <option key={sub} value={sub}>
+                  {sub}
+                </option>
+              ))}
             </select>
+          )}
 
           <input
             type="text"
@@ -260,6 +354,16 @@ export default function CreateListing() {
             required
             onChange={handleChange}
             value={formData.street}
+          />
+          <input
+            type="text"
+            placeholder="Pincode"
+            className="border p-3 rounded-lg"
+            id="pincode"
+            required
+            onChange={handleChange}
+            onBlur={fetchAddressDetails}
+            value={formData.pincode}
           />
           <input
             type="text"
@@ -278,15 +382,6 @@ export default function CreateListing() {
             required
             onChange={handleChange}
             value={formData.state}
-          />
-          <input
-            type="text"
-            placeholder="Pincode"
-            className="border p-3 rounded-lg"
-            id="pincode"
-            required
-            onChange={handleChange}
-            value={formData.pincode}
           />
 
           <div className="flex gap-6 flex-wrap">
@@ -312,38 +407,42 @@ export default function CreateListing() {
               <span>Rent</span>
             </div>
 
-            <div className="flex gap-2">
-              <input
-                type="checkbox"
-                id="parking"
-                className="w-5"
-                onChange={handleChange}
-                checked={formData.parking}
-              />
-              <span>Parking Spot</span>
-            </div>
+            {formData.propertyType === "Residential" && (
+              <>
+                <div className="flex gap-2">
+                  <input
+                    type="checkbox"
+                    id="parking"
+                    className="w-5"
+                    onChange={handleChange}
+                    checked={formData.parking}
+                  />
+                  <span>Parking Spot</span>
+                </div>
 
-            <div className="flex gap-2">
-              <input
-                type="checkbox"
-                id="furnished"
-                className="w-5"
-                onChange={handleChange}
-                checked={formData.furnished}
-              />
-              <span>Furnished</span>
-            </div>
+                <div className="flex gap-2">
+                  <input
+                    type="checkbox"
+                    id="furnished"
+                    className="w-5"
+                    onChange={handleChange}
+                    checked={formData.furnished}
+                  />
+                  <span>Furnished</span>
+                </div>
 
-            <div className="flex gap-2">
-              <input
-                type="checkbox"
-                id="balcony"
-                className="w-5"
-                onChange={handleChange}
-                checked={formData.balcony}
-              />
-              <span>Balcony</span>
-            </div>
+                <div className="flex gap-2">
+                  <input
+                    type="checkbox"
+                    id="balcony"
+                    className="w-5"
+                    onChange={handleChange}
+                    checked={formData.balcony}
+                  />
+                  <span>Balcony</span>
+                </div>
+              </>
+            )}
 
             <div className="flex gap-2">
               <input
@@ -358,32 +457,36 @@ export default function CreateListing() {
           </div>
 
           <div className="flex gap-6 flex-wrap">
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                id="bedrooms"
-                min="1"
-                max="10"
-                required
-                className="p-3 border-gray-300 rounded-lg"
-                onChange={handleChange}
-                value={formData.bedrooms || ""}
-              />
-              <p>Beds</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                id="bathrooms"
-                min="1"
-                max="10"
-                required
-                className="p-3 border-gray-300 rounded-lg"
-                onChange={handleChange}
-                value={formData.bathrooms || ""}
-              />
-              <p>Baths</p>
-            </div>
+            {formData.propertyType === "Residential" && (
+              <>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    id="bedrooms"
+                    min="1"
+                    max="10"
+                    required
+                    className="p-3 border-gray-300 rounded-lg"
+                    onChange={handleChange}
+                    value={formData.bedrooms || ""}
+                  />
+                  <p>Beds</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    id="bathrooms"
+                    min="1"
+                    max="10"
+                    required
+                    className="p-3 border-gray-300 rounded-lg"
+                    onChange={handleChange}
+                    value={formData.bathrooms || ""}
+                  />
+                  <p>Baths</p>
+                </div>
+              </>
+            )}
             <div className="flex items-center gap-2">
               <input
                 type="number"

@@ -100,6 +100,10 @@ export const getListings = async (req, res, next) => {
       ? { subType: { $regex: `^${req.query.subType}$`, $options: "i" } }
       : {};
 
+    const subSubTypeFilter = req.query.subSubType && req.query.subSubType.toLowerCase() !== "all"
+      ? { subSubType: { $regex: `^${req.query.subSubType}$`, $options: "i" } }
+      : {};
+
     const cityFilter = req.query.city && req.query.city.toLowerCase() !== "all"
     ? { city: { $regex: `^${req.query.city}$`, $options: "i" } }
     : {};
@@ -120,6 +124,7 @@ export const getListings = async (req, res, next) => {
       ...cityFilter,
       ...propertyTypeFilter,
       ...subTypeFilter,
+      ...subSubTypeFilter
     })
       .sort({ [sort]: order })
       .limit(limit)
