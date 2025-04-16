@@ -100,7 +100,7 @@ export const getListings = async (req, res, next) => {
       ? { subType: { $regex: `^${req.query.subType}$`, $options: "i" } }
       : {};
 
-    const subSubTypeFilter = req.query.subSubType && req.query.subSubType.toLowerCase() !== "all"
+    const subSubTypeFilter = req.query.subSubType && req.query.subSubType.trim() !== "" && req.query.subSubType.toLowerCase() !== "all"
       ? { subSubType: { $regex: `^${req.query.subSubType}$`, $options: "i" } }
       : {};
 

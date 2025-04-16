@@ -12,6 +12,7 @@ export default function Search() {
     city: "",
     propertyType: "",
     subType: "",
+    subSubType: "",
     parking: false,
     furnished: false,
     balcony: false,
@@ -25,6 +26,21 @@ export default function Search() {
   const [showMore, setShowMore] = useState(false);
   // console.log(listings);
 
+  const subSubTypeOptions = {
+    Office: [
+      "Ready to Move Space",
+      "Bare Shell Office Space",
+      "Co-working Space",
+      "Business Center",
+    ],
+    Retail: ["Showrooms", "Shops"],
+    Land: ["Commercial Land", "Agricultural Land", "Industrial Land/ Plots"],
+    Storage: ["Warehouse", "Cold Storage", "Self Storage"],
+    Industry: ["Factory", "Manufacturing"],
+    Hospitality: ["Hotel/ Resort", "Banquet Halls", "Guest House"],
+    "Apartment/Flat": ["1 BHK", "2 BHK", "3 BHK", "4+ BHK"],
+  };
+
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const searchTermFromUrl = urlParams.get("searchTerm");
@@ -32,6 +48,7 @@ export default function Search() {
     const cityFromUrl = urlParams.get("city");
     const propertyTypeFromUrl = urlParams.get("propertyType");
     const subTypeFromUrl = urlParams.get("subType");
+    const subSubTypeFromUrl = urlParams.get("subSubType");
     const parkingFromUrl = urlParams.get("parking");
     const furnishedFromUrl = urlParams.get("furnished");
     const balconyFromUrl = urlParams.get("balcony");
@@ -45,6 +62,7 @@ export default function Search() {
       cityFromUrl ||
       propertyTypeFromUrl ||
       subTypeFromUrl ||
+      subSubTypeFromUrl ||
       parkingFromUrl ||
       furnishedFromUrl ||
       balconyFromUrl ||
@@ -58,6 +76,7 @@ export default function Search() {
         city: cityFromUrl || "all",
         propertyType: propertyTypeFromUrl || "all",
         subType: subTypeFromUrl || "all",
+        subSubType: subSubTypeFromUrl || "all",
         parking: parkingFromUrl === "true" ? true : false,
         furnished: furnishedFromUrl === "true" ? true : false,
         balcony: balconyFromUrl === "true" ? true : false,
@@ -109,6 +128,9 @@ export default function Search() {
     if (e.target.id === "subType") {
       setSidebardata({ ...sidebardata, subType: e.target.value });
     }
+    if (e.target.id === "subSubType") {
+      setSidebardata({ ...sidebardata, subSubType: e.target.value });
+    }
     if (e.target.id === "searchTerm") {
       setSidebardata({ ...sidebardata, searchTerm: e.target.value });
     }
@@ -148,6 +170,7 @@ export default function Search() {
     urlParams.set("city", sidebardata.city);
     urlParams.set("propertyType", sidebardata.propertyType);
     urlParams.set("subType", sidebardata.subType);
+    urlParams.set("subSubType", sidebardata.subSubType);
     urlParams.set("parking", sidebardata.parking);
     urlParams.set("furnished", sidebardata.furnished);
     urlParams.set("balcony", sidebardata.balcony);
@@ -215,24 +238,51 @@ export default function Search() {
               <option value="">All</option>
               {sidebardata.propertyType === "residential" && (
                 <>
+    
                   <option value="Apartment/Flat">Apartment/Flat</option>
-                  <option value="Villa">Villa</option>
-                  <option value="Independent House">Independent House</option>
+                  <option value="Villa">Independent House/ Villa</option>
+                  <option value="Builder Floor">Builder Floor</option>
                   <option value="PG/Co-Living">PG/Co-Living</option>
-                  <option value="FarmHouse">FarmHouse</option>
+                  <option value="1 RK/ Studio Apartment">1 RK/ Studio Apartment</option>
+                  <option value="Serviced Apartment">Serviced Apartment</option>
+                  <option value="Farmhouse">Farmhouse</option>
+                  <option value="Other">Other</option>
                 </>
               )}
+
               {sidebardata.propertyType === "commercial" && (
                 <>
-                  <option value="Office Space">Office Space</option>
-                  <option value="Shop">Shop</option>
-                  <option value="Warehouse">Warehouse</option>
-                  <option value="Plots/Land">Plots/Land</option>
-                  <option value="Industry/Factory">Industry/Factory</option>
+                  <option value="Office">Office</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Plots/ Land">Plots/ Land</option>
+                  <option value="Storage">Storage</option>
+                  <option value="Industry">Industry</option>
+                  <option value="Hospitality">Hospitality</option>
+                  <option value="Other">Other</option>
                 </>
               )}
             </select>
           </div>
+
+          {subSubTypeOptions[sidebardata.subType] &&
+            subSubTypeOptions[sidebardata.subType].length > 0 && (<div className="flex items-center gap-2">
+              <label className="font-semibold">SubSubtype:</label>
+              <select
+                id="subSubType"
+                onChange={handleChange}
+                value={sidebardata.subSubType}
+                className="border rounded-lg p-3"
+              >
+                <option value="">All</option>
+                {subSubTypeOptions[sidebardata.subType] &&
+                  subSubTypeOptions[sidebardata.subType].map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
 
           <div className="flex flex-wrap items-center gap-2">
             <label className="font-semibold">Type:</label>
