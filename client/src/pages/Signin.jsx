@@ -1,14 +1,22 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice";
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../redux/user/userSlice";
 import OAuth from "../components/OAuth";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function Signin() {
   const [formData, setFormData] = useState({});
+  const [captchaToken, setCaptchaToken] = useState("");
   const { loading, error } = useSelector((state) => state.user);
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+
   const navigate = useNavigate();
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     setFormData({
@@ -17,21 +25,30 @@ export default function Signin() {
     });
   };
   // console.log(formData);
+  const handleCaptcha = (token) => {
+    setCaptchaToken(token); // Store the CAPTCHA token
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!captchaToken) {
+      dispatch(signInFailure("Please verify that you're not a robot"));
+      return;
+    }
+
     try {
       // setLoading(true);
       dispatch(signInStart());
+      const dataToSubmit = { ...formData, captchaToken };
 
-      const res = await fetch('/api/auth/signin', {
+      const res = await fetch("/api/auth/signin", {
         //stringify formdata
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSubmit),
       });
       const data = await res.json();
 
@@ -75,13 +92,15 @@ export default function Signin() {
           onChange={handleChange}
         ></input>
 
+        <ReCAPTCHA sitekey={RECAPTCHA_SITE_KEY} onChange={handleCaptcha} />
+
         <button
           disabled={loading}
           className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
         >
           {loading ? "Loading..." : "Sign In"}{" "}
         </button>
-        <OAuth/>
+        <OAuth />
       </form>
 
       <div className="flex gap-2 mt-5">

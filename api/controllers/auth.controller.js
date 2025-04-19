@@ -5,9 +5,9 @@ import jwt from "jsonwebtoken";
 
 export const signup = async (req, res, next) => {
   const { username, email, password } = req.body;  //extracting user data
-  const hashedPassword = bcryptjs.hashSync(password, 10); //salt no.
-  const newUser = new User({ username, email, password: hashedPassword });
-  try {
+    const hashedPassword = bcryptjs.hashSync(password, 10); //salt no.
+    const newUser = new User({ username, email, password: hashedPassword });
+    try {
     await newUser.save();
     res.status(201).json("User created successfully");
   } catch (error) {
@@ -16,9 +16,29 @@ export const signup = async (req, res, next) => {
 };
 
 export const signin = async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, captchaToken } = req.body;
+
+  if (!captchaToken) {
+    return res.status(400).json({ message: "Missing CAPTCHA token" });
+  }
+
   try {
-    const validUser = await User.findOne({ email });  //checking email
+    const secret = process.env.RECAPTCHA_SECRET_KEY;
+    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
+
+    const response = await fetch(verifyUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `secret=${secret}&response=${captchaToken}`,
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      return res.status(400).json({ message: "reCAPTCHA verification failed" });
+    }
+
+    const validUser = await User.findOne({ email }); //checking email
     if (!validUser) return next(errorHandler(404, "User not found!"));
 
     const validPassword = bcryptjs.compareSync(password, validUser.password);
@@ -26,9 +46,9 @@ export const signin = async (req, res, next) => {
 
     //creating token (authentication)
     const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET); //id, secret key
-    const { password: pass, ...rest } = validUser._doc; //we don't to see password so destructuring it      
+    const { password: pass, ...rest } = validUser._doc; //we don't to see password so destructuring it
     res
-      .cookie("access_token", token, { httpOnly: true })  //save token as a cookie
+      .cookie("access_token", token, { httpOnly: true }) //save token as a cookie
       .status(200)
       .json(rest); // return all things except password
   } catch (error) {
@@ -41,16 +61,15 @@ export const google = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
 
     if (user) {
-      //sign in the user  
+      //sign in the user
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
       const { password: pass, ...rest } = user._doc;
       res
         .cookie("access_token", token, { httpOnly: true })
         .status(200)
         .json(rest); //send back the user data
-        // console.log('Google Sign-In Route Hit');
-        // console.log(req.body);
-        
+      // console.log('Google Sign-In Route Hit');
+      // console.log(req.body);
     } else {
       //create the new user
       const generatedPassword =
@@ -83,7 +102,7 @@ export const signOut = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     res.clearCookie("access_token");
-    res.status(200).json('User has been logged out');
+    res.status(200).json("User has been logged out");
   } catch (error) {
     next(error);
   }
