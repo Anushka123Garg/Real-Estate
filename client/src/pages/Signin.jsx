@@ -13,7 +13,7 @@ export default function Signin() {
   const [formData, setFormData] = useState({});
   const [captchaToken, setCaptchaToken] = useState("");
   const { loading, error } = useSelector((state) => state.user);
-  const RECAPTCHA_SITE_KEY = "import.meta.env.VITE_RECAPTCHA_SITE_KEY";
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
