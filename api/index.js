@@ -7,7 +7,7 @@ import listingRouter from './routes/listing.route.js';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import Listing from './models/listing.model.js';
-
+import cors from 'cors';
 
 dotenv.config();
 
@@ -47,7 +47,10 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'client','dist','index.html'));
 });
 
-
+app.use(cors({
+    origin: '*',
+    credentials: true
+}));
 
 //middleware
 app.use((err, req, res, next) => {
