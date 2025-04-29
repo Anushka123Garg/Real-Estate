@@ -28,7 +28,7 @@ const Dashboard = (): JSX.Element => {
   const getPendingListings = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/listing/pending', {
+      const response = await fetch('https://real-estate-xbh8.onrender.com/api/listing/pending', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ const Dashboard = (): JSX.Element => {
   const handleApprove = async (id: number) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/listing/approve/${id}`, {
+      const response = await fetch(`https://real-estate-xbh8.onrender.com/api/listing/approve/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -108,7 +108,7 @@ const Dashboard = (): JSX.Element => {
   const handleReject = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/listing/reject/${selectedListingId}`, {
+      const response = await fetch(`https://real-estate-xbh8.onrender.com/api/listing/reject/${selectedListingId}`, {
         method: 'POST',
         body: JSON.stringify({ comment: rejectReason }),
         headers: {

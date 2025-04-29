@@ -17,7 +17,7 @@ const Login = ({ onLogin }: LoginProps): JSX.Element => {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/auth/admin', {
+      const response = await fetch('https://real-estate-xbh8.onrender.com/api/auth/admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
