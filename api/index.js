@@ -1,4 +1,4 @@
-import express from 'express'
+import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import userRouter from './routes/user.route.js';
@@ -20,55 +20,52 @@ mongoose.connect(process.env.MONGO).then(async () => {
     );
     console.log(`Updated ${result.modifiedCount} listings to include 'balcony' field.`);
 
-    }).catch ((err) => {
-        console.log(err);
-    });
+}).catch((err) => {
+    console.log(err);
+});
 
-    const __dirname = path.resolve();
+const __dirname = path.resolve();
 
 const app = express();
 
-app.use(express.json());  //allow the JSON as input to server, otherwise undefined will come
+// Configure CORS - place this BEFORE routes
+app.use(cors({
+    // Allow requests from your client origin
+    origin: process.env.CLIENT_URL || 'http://localhost:5173', // Adjust with your actual client URL
+    credentials: true // Allow cookies to be sent
+}));
 
-app.use(cookieParser());  //for getting info from cookie
+// Handle preflight requests
+app.options('*', cors());
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000!!!');
-}
-);
+app.use(express.json());  // Allow JSON as input to server
+app.use(cookieParser());  // For getting info from cookie
 
+// API routes
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/listing", listingRouter);
 
+// Serve static files from the React app
 app.use(express.static(path.join(__dirname, '/client/dist')));
 
+// For any other request, send the React app
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client','dist','index.html'));
+    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
 });
 
-app.use(cors({
-    origin: false,
-    credentials: true
-}));
-
-//middleware
+// Error handling middleware
 app.use((err, req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     const statusCode = err.statusCode || 500;
     const message = err.message || 'Internal Server Error';
     return res.status(statusCode).json({
-        success:false,
+        success: false,
         statusCode,
         message,
     });
 });
 
-app.options('*', (req, res) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.sendStatus(200);
+// Start the server
+app.listen(3000, () => {
+    console.log('Server is running on port 3000!!!');
 });
