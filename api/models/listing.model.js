@@ -69,6 +69,19 @@ const listingschema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        userIdCard: { 
+            type: String,
+            required: true,
+        },
+        status: { //active or inactive
+            type: String,
+            enum: ["PENDING", "APPROVED", "REJECTED"],
+            default: "PENDING",
+            required: true,
+        },
+        comment:{
+            type: String,
+        }
     }, 
     {timestamps: true} //save these true data's
 );

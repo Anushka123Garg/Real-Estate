@@ -120,6 +120,15 @@ export default function Listing() {
                 </p>
               )}
             </div>
+            {
+              listing.comment !=='' && listing.status === 'REJECTED' &&
+              <p>
+              <span
+              className="font-semibold text-red-700">Rejection Reason - </span>
+              {listing.comment}
+            </p>
+            }
+           
             <p className="text-slate-800">
               <span className="font-semibold text-black"> Description - </span>
               {listing.description}

@@ -56,6 +56,38 @@ export const signin = async (req, res, next) => {
   }
 };
 
+export const adminLogin = async (req, res, next) => {
+  const { username, password } = req.body;
+
+  try {
+    // Check if credentials match admin credentials
+    if (username !== 'admin' || password !== 'admin') {
+      return next(errorHandler(401, "Invalid admin credentials"));
+    }
+
+    // Create admin token with role included in payload
+    const token = jwt.sign(
+      { 
+        id: 'admin',
+        role: 'admin' 
+      }, 
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res
+      .cookie("access_token", token, { httpOnly: true })
+      .status(200)
+      .json({ 
+        message: "Admin login successful",
+        token: token 
+      });
+      
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const google = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });

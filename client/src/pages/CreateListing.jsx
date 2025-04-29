@@ -34,6 +34,8 @@ export default function CreateListing() {
     parking: false,
     furnished: false,
     balcony: false,
+    userIdCard: "", // Add userIdCard field,
+   status: "PENDING",
   });
   const residentialSubtypes = [
     "Apartment/Flat",
@@ -143,6 +145,48 @@ export default function CreateListing() {
     });
   };
 
+  // Add after the storeImage function
+const handleIdCardUpload = async (e) => {
+  const file = e.target.files[0];
+  
+  if (!file) return;
+  
+  setUploading(true);
+  setError(false);
+  
+  try {
+    const storage = getStorage(app);
+    const fileName = new Date().getTime() + "-idcard-" + file.name;
+    const storageRef = ref(storage, fileName);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+    
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress = 
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log(`ID Card upload is ${progress}% done`);
+      },
+      (error) => {
+        setError("ID Card upload failed (2 mb max)");
+        setUploading(false);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setFormData({
+            ...formData,
+            userIdCard: downloadURL,
+          });
+          setUploading(false);
+        });
+      }
+    );
+  } catch (error) {
+    setError("Error uploading ID card");
+    setUploading(false);
+  }
+};
+
   const handleRemoveImage = (index) => {
     setFormData({
       ...formData,
@@ -219,40 +263,42 @@ export default function CreateListing() {
     }
   };
   
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+// Modify the handleSubmit function to include validation for userIdCard
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      if (formData.imageUrls.length === 0)
-        return setError("You must upload at least one image");
-      if (+formData.regularPrice < +formData.discountPrice)
-        return setError("Discount Price must be lower than regular Price");
+  try {
+    if (formData.imageUrls.length === 0)
+      return setError("You must upload at least one image");
+    if (+formData.regularPrice < +formData.discountPrice)
+      return setError("Discount Price must be lower than regular Price");
+    if (!formData.userIdCard)
+      return setError("You must upload an ID card for verification");
 
-      setLoading(true);
-      setError(false); //remove the previous error
-      const res = await fetch("/api/listing/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          userRef: currentUser._id,
-        }),
-      });
-      const data = await res.json();
-      setLoading(false);
-      if (data.success === false) {
-        setError(data.message);
-      }
-      navigate(`/listing/${data._id}`);
-    } catch (error) {
-      setError(error.message);
-      setLoading(false);
+    setLoading(true);
+    setError(false); //remove the previous error
+    const res = await fetch("/api/listing/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...formData,
+        userRef: currentUser._id,
+      }),
+    });
+    const data = await res.json();
+    setLoading(false);
+    if (data.success === false) {
+      setError(data.message);
     }
-    console.log(formData);
-  };
-
+    navigate(`/listing/${data._id}`);
+  } catch (error) {
+    setError(error.message);
+    setLoading(false);
+  }
+  console.log(formData);
+};
   return (
     <main className="p-3 max-w-4xl mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">
@@ -565,6 +611,44 @@ export default function CreateListing() {
                 </button>
               </div>
             ))}
+
+
+<p className="font-semibold mt-4">
+  ID Card Verification:
+  <span className="font-normal text-gray-600 ml-2">
+    Upload your ID card for verification
+  </span>
+</p>
+
+<div className="flex gap-4">
+  <input
+    onChange={handleIdCardUpload}
+    className="p-3 border border-gray-300 rounded w-full"
+    type="file"
+    id="userIdCard"
+    accept="image/*"
+  />
+  {formData.userIdCard && (
+    <span className="text-green-500 self-center">✓ Uploaded</span>
+  )}
+</div>
+
+{formData.userIdCard && (
+  <div className="flex justify-between p-3 border items-center">
+    <img
+      src={formData.userIdCard}
+      alt="ID Card"
+      className="w-20 h-20 object-contain rounded-lg"
+    />
+    <button
+      type="button"
+      onClick={() => setFormData({...formData, userIdCard: ""})}
+      className="p-3 text-red-700 rounded-lg uppercase hover:opacity-75"
+    >
+      Delete
+    </button>
+  </div>
+)}
 
           <button
             disabled={loading || uploading}

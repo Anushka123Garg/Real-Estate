@@ -314,7 +314,24 @@ export default function Profile() {
                 to={`/listing/${listing._id}`}
               >
                 <p>{listing.name}</p>
+                {
+                  listing.status === 'APPROVED' ?
+                  <p
+                  style={{fontSize:14,marginTop:5}}
+                  className="text-green-700">{listing.status}</p> :
+                  listing.status === 'REJECTED' ?
+                  <p
+                  style={{fontSize:14,marginTop:5}}
+                  className="text-red-700">{listing.status}</p>
+:
+                  <p
+                  style={{fontSize:14,marginTop:5}}
+                  className="text-yellow-700">{listing.status}</p>
+                }
               </Link>
+
+            
+              
 
               <div className="flex flex-col items-center">
                 <button
