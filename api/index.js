@@ -7,7 +7,7 @@ import listingRouter from './routes/listing.route.js';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import Listing from './models/listing.model.js';
-// import cors from 'cors';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -28,15 +28,9 @@ const __dirname = path.resolve();
 
 const app = express();
 
-// Configure CORS - place this BEFORE routes
-// app.use(cors({
-//     // Allow requests from your client origin
-//     origin: '*',
-//     credentials: true // Allow cookies to be sent
-// }));
+app.use(cors());
 
-// Handle preflight requests
-// app.options('*', cors());
+app.options('*', cors());
 
 app.use(express.json());  // Allow JSON as input to server
 app.use(cookieParser());  // For getting info from cookie
@@ -56,19 +50,6 @@ app.get('*', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-
-    const allowedOrigins = ['https://real-estate-xbh8.onrender.com', 'https://real-estate-1-d1r6.onrender.com']
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-    } else {
-        res.setHeader('Access-Control-Allow-Origin', '*');
-    }
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    res.header("Access-Control-Allow-credentials", true);
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, UPDATE");
-    next();
-
     const statusCode = err.statusCode || 500;
     const message = err.message || 'Internal Server Error';
     return res.status(statusCode).json({
@@ -80,5 +61,6 @@ app.use((err, req, res, next) => {
 
 // Start the server
 app.listen(3000, () => {
+    
     console.log('Server is running on port 3000!!!');
 });
