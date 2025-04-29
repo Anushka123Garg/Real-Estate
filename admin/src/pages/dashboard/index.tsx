@@ -33,7 +33,6 @@ const Dashboard = (): JSX.Element => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include'
       });
       if (!response.ok) {
         throw new Error('Failed to fetch pending listings');
@@ -74,7 +73,6 @@ const Dashboard = (): JSX.Element => {
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -114,7 +112,6 @@ const Dashboard = (): JSX.Element => {
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include'
       });
 
       if (!response.ok) {
