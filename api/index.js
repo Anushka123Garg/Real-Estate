@@ -31,7 +31,7 @@ const app = express();
 // Configure CORS - place this BEFORE routes
 app.use(cors({
     // Allow requests from your client origin
-    origin: process.env.CLIENT_URL || 'http://localhost:5173', // Adjust with your actual client URL
+    origin: '*',
     credentials: true // Allow cookies to be sent
 }));
 
