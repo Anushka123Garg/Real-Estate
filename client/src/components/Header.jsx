@@ -26,11 +26,11 @@ export default function Header() {
   }, [location.search]);
 
   return (
-    <header className="bg-slate-700 shadow-md">
+    <header className="bg-slate-700 shadow-md fixed top-0 left-0 w-full">
       <div className="flex justify-between items-center max-w-6xl mx-auto p-3">
         <Link to="/">
           <h1 className="font-bold text-xl sm:text-xl flex flex-wrap">
-            <span className="text-white font-bold text-4xl font-serif">Smart Estate</span>
+            <span className="text-white font-bold lg:text-4xl sm:text-xl font-serif">Smart Estate</span>
           </h1>
         </Link>
         <form
@@ -65,7 +65,7 @@ export default function Header() {
           <Link to="/profile">
             {currentUser ? (
               <img
-                className="rounded-full h-7 w-7 object-cover"
+                className="rounded-full h-7 w-7 object-cover flex-shrink-0"
                 src={currentUser.avatar}
                 alt="profile"
               />

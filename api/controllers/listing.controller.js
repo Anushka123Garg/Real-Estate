@@ -86,6 +86,17 @@ export const getListings = async (req, res, next) => {
     if (balcony === undefined || balcony === "false") {
       balcony = { $in: [false, true] };
     }
+
+    // const parseBool = (val) => val === "true" ? true : val === "false" ? false : { $in: [false, true] };
+
+    // const query = {
+    //   'facilities.gymnasium': parseBool(req.query.gymnasium),
+    //   'facilities.playArea': parseBool(req.query.playArea),
+    //   'facilities.games': parseBool(req.query.games),
+    //   'facilities.pool': parseBool(req.query.pool),
+    // };
+
+
     let type = req.query.type;
 
     if (type === undefined || type === "all") {

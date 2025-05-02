@@ -56,6 +56,26 @@ export const signin = async (req, res, next) => {
   }
 };
 
+export const getMe = async (req, res, next) => {
+  try {
+    const token = req.cookies.access_token;
+    if (!token) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ token, user }); 
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+};
+
+
 export const google = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });

@@ -13,6 +13,12 @@ export default function Search() {
     propertyType: "",
     subType: "",
     subSubType: "",
+    // facilities: {
+    //   pool: false,
+    //   playArea: false,
+    //   gymnasium: false,
+    //   games: false,
+    // },
     parking: false,
     furnished: false,
     balcony: false,
@@ -52,6 +58,10 @@ export default function Search() {
     const parkingFromUrl = urlParams.get("parking");
     const furnishedFromUrl = urlParams.get("furnished");
     const balconyFromUrl = urlParams.get("balcony");
+    // const poolFromUrl = urlParams.get("pool");
+    // const playAreaFromUrl = urlParams.get("playArea");
+    // const gymnasiumFromUrl = urlParams.get("gymnasium");
+    // const gamesFromUrl = urlParams.get("games");
     const offerFromUrl = urlParams.get("offer");
     const sortFromUrl = urlParams.get("sort");
     const orderFromUrl = urlParams.get("order");
@@ -64,6 +74,7 @@ export default function Search() {
       subTypeFromUrl ||
       subSubTypeFromUrl ||
       parkingFromUrl ||
+      // poolFromUrl || gymnasiumFromUrl || gamesFromUrl || playAreaFromUrl ||
       furnishedFromUrl ||
       balconyFromUrl ||
       offerFromUrl ||
@@ -80,6 +91,18 @@ export default function Search() {
         parking: parkingFromUrl === "true" ? true : false,
         furnished: furnishedFromUrl === "true" ? true : false,
         balcony: balconyFromUrl === "true" ? true : false,
+        // facilities: {
+        //   pool: false,
+        //   playArea: false,
+        //   gymnasium: false,
+        //   games: false,
+        // },
+        // facilities: {
+        //   pool: poolFromUrl === "true",
+        //   playArea: playAreaFromUrl === "true",
+        //   gymnasium: gymnasiumFromUrl === "true",
+        //   games: gamesFromUrl === "true",
+        // },
         offer: offerFromUrl === "true" ? true : false,
         sort: sortFromUrl || "created_at",
         order: orderFromUrl || "desc",
@@ -149,6 +172,17 @@ export default function Search() {
           e.target.checked || e.target.checked === "true" ? true : false,
       });
     }
+    // if (
+    //   ["pool", "playArea", "gymnasium", "games"].includes(e.target.id)
+    // ) {
+    //   setSidebardata({
+    //     ...sidebardata,
+    //     facilities: {
+    //       ...sidebardata.facilities,
+    //       [e.target.id]: e.target.checked,
+    //     },
+    //   });
+    // }
 
     if (e.target.id === "sort_order") {
       const sort = e.target.value.split("_")[0] || "created_at";
@@ -174,6 +208,10 @@ export default function Search() {
     urlParams.set("parking", sidebardata.parking);
     urlParams.set("furnished", sidebardata.furnished);
     urlParams.set("balcony", sidebardata.balcony);
+    // urlParams.set("pool", sidebardata.facilities.pool);
+    // urlParams.set("playArea", sidebardata.facilities.playArea);
+    // urlParams.set("gymnasium", sidebardata.facilities.gymnasium);
+    // urlParams.set("games", sidebardata.facilities.games);
     urlParams.set("offer", sidebardata.offer);
     urlParams.set("sort", sidebardata.sort);
     urlParams.set("order", sidebardata.order);
@@ -196,8 +234,9 @@ export default function Search() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row">
-      <div className="p-7 border-b-2 md:border-r-2 md:min-h-screen">
+    <div className="flex flex-col md:flex-row pt-[80px]">
+      <div className="p-5 border-b-2 md:border-r-2 md:min-h-screen w-full md:w-[400px]">
+      <div className="lg:sticky lg:top-[90px] p-3">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
           <div className="flex items-center gap-2">
             <label className="whitespace-nowrap font-semibold">
@@ -347,6 +386,17 @@ export default function Search() {
           <div className="flex flex-wrap items-center gap-2">
             <label className="font-semibold">Amenities:</label>
 
+            {/* <div className="flex gap-2">
+              <input
+                type="checkbox"
+                id="pool"
+                className="w-5"
+                onChange={handleChange}
+                checked={sidebardata.facilities.pool}
+              ></input>
+              <span>Swimming Pool</span>
+            </div> */}
+
             <div className="flex gap-2">
               <input
                 type="checkbox"
@@ -397,6 +447,7 @@ export default function Search() {
             Search
           </button>
         </form>
+        </div>
       </div>
 
       <div className="flex-1">
