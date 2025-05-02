@@ -35,6 +35,8 @@ export default function CreateListing() {
     parking: false,
     furnished: false,
     balcony: false,
+    userIdCard: "", // Add userIdCard field,
+    status: "PENDING",
   });
 
   const residentialSubtypes = [
@@ -237,6 +239,9 @@ export default function CreateListing() {
       if (+formData.regularPrice < +formData.discountPrice)
         return setError("Discount Price must be lower than regular Price");
 
+      if (!formData.userIdCard)
+        return setError("You must upload an ID card for verification");
+
       setLoading(true); //remove the previous error
       setError(false);
       const res = await fetch(`/api/listing/update/${params.listingId}`, {
@@ -246,6 +251,7 @@ export default function CreateListing() {
         },
         body: JSON.stringify({
           ...formData,
+          status: "PENDING",
           userRef: currentUser._id,
         }),
       });
@@ -261,6 +267,49 @@ export default function CreateListing() {
     }
     console.log(formData);
   };
+
+  const handleIdCardUpload = async (e) => {
+    const file = e.target.files[0];
+    
+    if (!file) return;
+    
+    setUploading(true);
+    setError(false);
+    
+    try {
+      const storage = getStorage(app);
+      const fileName = new Date().getTime() + "-idcard-" + file.name;
+      const storageRef = ref(storage, fileName);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = 
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`ID Card upload is ${progress}% done`);
+        },
+        (error) => {
+          setError("ID Card upload failed (2 mb max)");
+          setUploading(false);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            setFormData({
+              ...formData,
+              userIdCard: downloadURL,
+            });
+            setUploading(false);
+          });
+        }
+      );
+    } catch (error) {
+      setError("Error uploading ID card");
+      setUploading(false);
+    }
+  };
+
+
   return (
     <main className="p-3 max-w-4xl mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">
@@ -573,6 +622,43 @@ export default function CreateListing() {
                 </button>
               </div>
             ))}
+
+<p className="font-semibold mt-4">
+  ID Card Verification:
+  <span className="font-normal text-gray-600 ml-2">
+    Upload your ID card for verification
+  </span>
+</p>
+
+<div className="flex gap-4">
+  <input
+    onChange={handleIdCardUpload}
+    className="p-3 border border-gray-300 rounded w-full"
+    type="file"
+    id="userIdCard"
+    accept="image/*"
+  />
+  {formData.userIdCard && (
+    <span className="text-green-500 self-center">✓ Uploaded</span>
+  )}
+</div>
+
+{formData.userIdCard && (
+  <div className="flex justify-between p-3 border items-center">
+    <img
+      src={formData.userIdCard}
+      alt="ID Card"
+      className="w-20 h-20 object-contain rounded-lg"
+    />
+    <button
+      type="button"
+      onClick={() => setFormData({...formData, userIdCard: ""})}
+      className="p-3 text-red-700 rounded-lg uppercase hover:opacity-75"
+    >
+      Delete
+    </button>
+  </div>
+)}
 
           <button
             disabled={loading || uploading}

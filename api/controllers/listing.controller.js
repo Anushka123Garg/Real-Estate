@@ -62,6 +62,79 @@ export const getListing = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getPendingListings = async (req, res, next) => {
+  try {
+    const listings = await Listing.find({ status: 'PENDING' });
+    if (!listings) {
+      return next(errorHandler(404, "No pending listings found!"));
+    }
+    res.status(200).json(listings);
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// ...existing code...
+
+export const approveListing = async (req, res, next) => {
+  try {
+    const listing = await Listing.findById(req.params.id);
+
+    if (!listing) {
+      return next(errorHandler(404, "Listing not found!"));
+    }
+
+    const updatedListing = await Listing.findByIdAndUpdate(
+      req.params.id,
+      { status: 'APPROVED' },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Listing has been approved",
+      listing: updatedListing
+    });
+  } catch (error) {
+    console.log(error);
+    
+    next(error);
+  }
+};
+
+export const rejectListing = async (req, res, next) => {
+  try {
+    const listing = await Listing.findById(req.params.id);
+
+    if (!listing) {
+      return next(errorHandler(404, "Listing not found!"));
+    }
+
+    // Optionally capture rejection reason if provided in request body
+    const rejectionReason = req.body.comment || "Not specified";
+
+    const updatedListing = await Listing.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: 'REJECTED',
+        comment: rejectionReason
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Listing has been rejected",
+      listing: updatedListing
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 export const getListings = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 9;
@@ -116,8 +189,8 @@ export const getListings = async (req, res, next) => {
       : {};
 
     const cityFilter = req.query.city && req.query.city.toLowerCase() !== "all"
-    ? { city: { $regex: `^${req.query.city}$`, $options: "i" } }
-    : {};
+      ? { city: { $regex: `^${req.query.city}$`, $options: "i" } }
+      : {};
 
     const searchTerm = req.query.searchTerm || "";
 
@@ -131,6 +204,7 @@ export const getListings = async (req, res, next) => {
       furnished,
       balcony,
       parking,
+      status: "APPROVED",
       type,
       ...cityFilter,
       ...propertyTypeFilter,
@@ -141,9 +215,9 @@ export const getListings = async (req, res, next) => {
       .limit(limit)
       .skip(startIndex);
 
-      console.log("Query Filters:", { propertyTypeFilter, subTypeFilter });
+    console.log("Query Filters:", { propertyTypeFilter, subTypeFilter });
 
-      console.log("Fetched Listings from DB:", listings);
+    console.log("Fetched Listings from DB:", listings);
 
     return res.status(200).json(listings);
   } catch (error) {
