@@ -24,9 +24,9 @@ export default function Signin() {
       [e.target.id]: e.target.value,
     });
   };
-  // console.log(formData);
+
   const handleCaptcha = (token) => {
-    setCaptchaToken(token); // Store the CAPTCHA token
+    setCaptchaToken(token);
   };
 
   const handleSubmit = async (e) => {
@@ -38,12 +38,10 @@ export default function Signin() {
     }
 
     try {
-      // setLoading(true);
       dispatch(signInStart());
       const dataToSubmit = { ...formData, captchaToken };
 
       const res = await fetch("/api/auth/signin", {
-        //stringify formdata
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,65 +50,82 @@ export default function Signin() {
       });
       const data = await res.json();
 
-      console.log(data);
-
       if (data.success === false) {
-        // setLoading(false);
-        // setError(data.message);
         dispatch(signInFailure(data.message));
-
         return;
       }
-      // setLoading(false);
-      // setError(null);
       dispatch(signInSuccess(data));
       navigate("/");
     } catch (error) {
-      // setLoading(false);
-      // setError(error.message);
       dispatch(signInFailure(error.message));
     }
   };
 
   return (
-    <div className="p-3 max-w-lg mx-auto">
-      <h1 className="text-4-xl text-center font-semibold my-7">Sign In</h1>
-
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <input
-          type="email"
-          className="border p-3 rounded-lg"
-          placeholder="email"
-          id="email"
-          onChange={handleChange}
-        ></input>
-        <input
-          type="password"
-          className="border p-3 rounded-lg"
-          placeholder="password"
-          id="password"
-          onChange={handleChange}
-        ></input>
-
-        <ReCAPTCHA sitekey={RECAPTCHA_SITE_KEY} onChange={handleCaptcha} />
-
-        <button
-          disabled={loading}
-          className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
-        >
-          {loading ? "Loading..." : "Sign In"}{" "}
-        </button>
-        <OAuth />
-      </form>
-
-      <div className="flex gap-2 mt-5">
-        <p>Dont have an Account?</p>
-        <Link to={"/sign-up"}>
-          <span className="text-blue-700">Sign Up</span>
-        </Link>
+    <div className="min-h-screen bg-gray-100 py-20 flex items-center justify-center">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 className="text-3xl font-semibold text-gray-800 text-center mb-6">
+          Sign In to <span className="text-blue-600">SmartEstate</span>
+        </h1>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="email"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="Your email"
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="Your password"
+              onChange={handleChange}
+            />
+          </div>
+          <div className="mb-4">
+            <ReCAPTCHA sitekey={RECAPTCHA_SITE_KEY} onChange={handleCaptcha} />
+            {error === "Please verify that you're not a robot" && (
+              <p className="text-red-500 text-sm mt-1">{error}</p>
+            )}
+          </div>
+          <button
+            disabled={loading}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md focus:outline-none focus:shadow-outline w-full"
+          >
+            {loading ? "Signing In..." : "Sign In"}
+          </button>
+          <OAuth className="w-full py-3 px-6 rounded-md focus:outline-none focus:shadow-outline" />{" "}
+        </form>
+        {/* <OAuth /> */}
+        <div className="mt-6 flex items-center justify-between">
+          <p className="text-gray-600 text-sm">Don't have an account?</p>
+          <Link
+            to={"/sign-up"}
+            className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+          >
+            Sign Up
+          </Link>
+        </div>
+        {error && error !== "Please verify that you're not a robot" && (
+          <p className="text-red-500 text-center mt-4">{error}</p>
+        )}
       </div>
-
-      {error && <p className="text-red-500 mt-5">{error}</p>}
     </div>
   );
 }
