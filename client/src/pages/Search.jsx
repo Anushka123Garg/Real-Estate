@@ -3,8 +3,14 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import ListingItem from "../components/ListingItem";
+import Slider from "rc-slider";
+import "rc-slider/assets/index.css";
 
 export default function Search() {
+  const PRICE_MIN = 0;
+  const PRICE_MAX = 10000000;
+  const PRICE_STEP = 50000;
+
   const navigate = useNavigate();
   const [sidebardata, setSidebardata] = useState({
     searchTerm: "",
@@ -13,8 +19,8 @@ export default function Search() {
     propertyType: "",
     subType: "",
     subSubType: "",
-    minPrice: 10000,
-    maxPrice: 10000000,
+    minPrice: PRICE_MIN,
+    maxPrice: PRICE_MAX,
     // facilities: {
     //   pool: false,
     //   playArea: false,
@@ -25,7 +31,6 @@ export default function Search() {
     furnished: false,
     balcony: false,
     offer: false,
-    sort: "created_at",
     order: "desc",
   });
 
@@ -33,6 +38,37 @@ export default function Search() {
   const [listings, setListings] = useState([]);
   const [showMore, setShowMore] = useState(false);
   // console.log(listings);
+
+  const [values, setValues] = useState([PRICE_MIN, PRICE_MAX]);
+
+  const handlePriceChange = (newValues) => {
+    setValues(newValues);
+    setSidebardata((prev) => ({
+      ...prev,
+      minPrice: newValues[0],
+      maxPrice: newValues[1],
+    }));
+  };
+
+  const handleMinPriceDropdownChange = (event) => {
+    const newMinPrice = Number(event.target.value);
+    if (newMinPrice <= values[1]) {
+      setValues([newMinPrice, values[1]]);
+      setSidebardata((prev) => ({ ...prev, minPrice: newMinPrice }));
+    }
+  };
+
+  const handleMaxPriceDropdownChange = (event) => {
+    const newMaxPrice = Number(event.target.value);
+    if (newMaxPrice >= values[0]) {
+      setValues([values[0], newMaxPrice]);
+      setSidebardata((prev) => ({ ...prev, maxPrice: newMaxPrice }));
+    }
+  };
+  const priceOptions = [];
+  for (let i = PRICE_MIN; i <= PRICE_MAX; i += PRICE_STEP) {
+    priceOptions.push(i);
+  }
 
   const subSubTypeOptions = {
     Office: [
@@ -62,12 +98,12 @@ export default function Search() {
     const balconyFromUrl = urlParams.get("balcony");
     const minPriceFromUrl = urlParams.get("minPrice");
     const maxPriceFromUrl = urlParams.get("maxPrice");
+
     // const poolFromUrl = urlParams.get("pool");
     // const playAreaFromUrl = urlParams.get("playArea");
     // const gymnasiumFromUrl = urlParams.get("gymnasium");
     // const gamesFromUrl = urlParams.get("games");
     const offerFromUrl = urlParams.get("offer");
-    const sortFromUrl = urlParams.get("sort");
     const orderFromUrl = urlParams.get("order");
 
     if (
@@ -82,7 +118,6 @@ export default function Search() {
       furnishedFromUrl ||
       balconyFromUrl ||
       offerFromUrl ||
-      sortFromUrl ||
       minPriceFromUrl ||
       maxPriceFromUrl ||
       orderFromUrl
@@ -96,8 +131,8 @@ export default function Search() {
         subSubType: subSubTypeFromUrl || "all",
         parking: parkingFromUrl === "true" ? true : false,
         furnished: furnishedFromUrl === "true" ? true : false,
-        minPrice: minPriceFromUrl ? Number(minPriceFromUrl) : 10000,
-        maxPrice: maxPriceFromUrl ? Number(maxPriceFromUrl) : 10000000,
+        minPrice: minPriceFromUrl ? Number(minPriceFromUrl) : PRICE_MIN,
+        maxPrice: maxPriceFromUrl ? Number(maxPriceFromUrl) : PRICE_MAX,
         balcony: balconyFromUrl === "true" ? true : false,
         // facilities: {
         //   pool: false,
@@ -112,7 +147,6 @@ export default function Search() {
         //   games: gamesFromUrl === "true",
         // },
         offer: offerFromUrl === "true" ? true : false,
-        sort: sortFromUrl || "created_at",
         order: orderFromUrl || "desc",
       });
     }
@@ -146,8 +180,7 @@ export default function Search() {
   const handleChange = (e) => {
     const { id, value, type, checked } = e.target;
 
-    if (
-      id === "all" || id === "rent" || id === "sale") {
+    if (id === "all" || id === "rent" || id === "sale") {
       setSidebardata({ ...sidebardata, type: id });
     }
     if (id === "propertyType") {
@@ -166,7 +199,11 @@ export default function Search() {
       setSidebardata({ ...sidebardata, city: value });
     }
     if (
-      id === "parking" || id === "furnished" || id === "balcony" || id === "offer") {
+      id === "parking" ||
+      id === "furnished" ||
+      id === "balcony" ||
+      id === "offer"
+    ) {
       setSidebardata({
         ...sidebardata,
         [id]: checked || checked === "true" ? true : false,
@@ -183,23 +220,8 @@ export default function Search() {
     //     },
     //   });
     // }
-    if (id === "minPrice" || id === "maxPrice") {
-      const priceValue = Number(value);
-      setSidebardata((prev) => ({
-        ...prev,
-        [id]: priceValue, }));
-    }
 
-    if (e.target.id === "sort_order") {
-      const sort = e.target.value.split("_")[0] || "created_at";
-      const order = e.target.value.split("_")[1] || "desc";
-
-      setSidebardata({
-        ...sidebardata,
-        sort,
-        order,
-      });
-    }
+  
   };
 
   const handleSubmit = (e) => {
@@ -214,14 +236,13 @@ export default function Search() {
     urlParams.set("parking", sidebardata.parking);
     urlParams.set("furnished", sidebardata.furnished);
     urlParams.set("balcony", sidebardata.balcony);
-    urlParams.set("minPrice", sidebardata.minPrice);
-    urlParams.set("maxPrice", sidebardata.maxPrice);
+      urlParams.set("minPrice", sidebardata.minPrice);
+      urlParams.set("maxPrice", sidebardata.maxPrice);
     // urlParams.set("pool", sidebardata.facilities.pool);
     // urlParams.set("playArea", sidebardata.facilities.playArea);
     // urlParams.set("gymnasium", sidebardata.facilities.gymnasium);
     // urlParams.set("games", sidebardata.facilities.games);
     urlParams.set("offer", sidebardata.offer);
-    urlParams.set("sort", sidebardata.sort);
     urlParams.set("order", sidebardata.order);
     const searchQuery = urlParams.toString();
     navigate(`/search?${searchQuery}`);
@@ -240,7 +261,6 @@ export default function Search() {
     }
     setListings([...listings, ...data]);
   };
-
   return (
     <div className="flex flex-col md:flex-row pt-[80px]">
       <div className="p-5 border-b-2 md:border-r-2 md:min-h-screen w-full md:w-[400px]">
@@ -441,51 +461,81 @@ export default function Search() {
                 <span>Balcony</span>
               </div>
             </div>
+
             <div className="flex flex-col gap-4">
+              <style>
+                {`
+                  .my-slider-track {
+                    height: 8px;
+                    background-color: #ddd;
+                    border-radius: 4px;
+                  }
+                  .my-slider-rail {
+                    background-color: #ddd;
+                    border-radius: 4px;
+                  }
+                  .my-slider-handle {
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background-color: blue; 
+                    border: 2px solid blue;
+                    cursor: grab;
+                    outline: none;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+                  }
+                  .my-slider-handle:active {
+                    cursor: grabbing;
+                  }
+                  .my-slider-active-track {
+                    background-color: black;
+                    border-radius: 4px;
+                  }
+                `}
+              </style>
               <label className="font-semibold">
-                Price Range: 
-                ₹{sidebardata.minPrice.toLocaleString("en-IN")} – ₹
-                {sidebardata.maxPrice.toLocaleString("en-IN")}
+                Price Range: ₹{values[0].toLocaleString("en-IN")} – ₹
+                {values[1].toLocaleString("en-IN")}
               </label>
 
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  id="minPrice"
-                  min="10000"
-                  max="10000000"
-                  step="10000"
-                  value={sidebardata.minPrice}
-                  onChange={handleChange}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                />
-                <input
-                  type="range"
-                  id="maxPrice"
-                  min="50000"
-                  max="10000000"
-                  step="50000"
-                  value={sidebardata.maxPrice}
-                  onChange={handleChange}
-                  className="w-full"
+              <div className="px-2">
+                <Slider
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
+                  step={PRICE_STEP}
+                  value={values}
+                  onChange={handlePriceChange}
+                  range
+                  railClassName="my-slider-rail"
+                  trackClassName="my-slider-active-track"
+                  handleClassName="my-slider-handle"
                 />
               </div>
+              <div className="flex justify-between text-sm px-1">
+                <select
+                  className="border rounded p-2"
+                  value={values[0]}
+                  onChange={handleMinPriceDropdownChange}
+                >
+                  {priceOptions.map((price) => (
+                    <option key={price} value={price}>
+                      ₹{price.toLocaleString("en-IN")}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="border rounded p-2"
+                  value={values[1]}
+                  onChange={handleMaxPriceDropdownChange}
+                >
+                  {priceOptions.map((price) => (
+                    <option key={price} value={price}>
+                      ₹{price.toLocaleString("en-IN")}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-
-            <div className="flex items-center gap-2">
-            <label className="font-semibold">Sort:</label>
-            <select
-              onChange={handleChange}
-              defaultValue={"created_at_desc"}
-              id="sort_order"
-              className="border rounded-lg p-3"
-            >
-              <option value="regularPrice_desc"> Price high to low</option>
-              <option value="regularPrice_asc"> Price low to high</option>
-              <option value="createdAt_desc"> Latest</option>
-              <option value="createdAt_Asc"> Oldest</option>
-            </select>
-          </div>
 
             <button className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95">
               Search
