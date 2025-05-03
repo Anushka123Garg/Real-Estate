@@ -13,6 +13,8 @@ export default function Search() {
     propertyType: "",
     subType: "",
     subSubType: "",
+    minPrice: 10000,
+    maxPrice: 10000000,
     // facilities: {
     //   pool: false,
     //   playArea: false,
@@ -58,6 +60,8 @@ export default function Search() {
     const parkingFromUrl = urlParams.get("parking");
     const furnishedFromUrl = urlParams.get("furnished");
     const balconyFromUrl = urlParams.get("balcony");
+    const minPriceFromUrl = urlParams.get("minPrice");
+    const maxPriceFromUrl = urlParams.get("maxPrice");
     // const poolFromUrl = urlParams.get("pool");
     // const playAreaFromUrl = urlParams.get("playArea");
     // const gymnasiumFromUrl = urlParams.get("gymnasium");
@@ -79,6 +83,8 @@ export default function Search() {
       balconyFromUrl ||
       offerFromUrl ||
       sortFromUrl ||
+      minPriceFromUrl ||
+      maxPriceFromUrl ||
       orderFromUrl
     ) {
       setSidebardata({
@@ -90,6 +96,8 @@ export default function Search() {
         subSubType: subSubTypeFromUrl || "all",
         parking: parkingFromUrl === "true" ? true : false,
         furnished: furnishedFromUrl === "true" ? true : false,
+        minPrice: minPriceFromUrl ? Number(minPriceFromUrl) : 10000,
+        maxPrice: maxPriceFromUrl ? Number(maxPriceFromUrl) : 10000000,
         balcony: balconyFromUrl === "true" ? true : false,
         // facilities: {
         //   pool: false,
@@ -120,11 +128,9 @@ export default function Search() {
       console.log("API Response:", data);
       console.log("Type of listings:", typeof data);
 
-
       if (data.length > 8) {
         setShowMore(true);
-      }
-      else{
+      } else {
         setShowMore(false);
       }
       setListings(data);
@@ -135,41 +141,35 @@ export default function Search() {
 
     fetchListings();
   }, [location.search]);
-    console.log(sidebardata);
+  console.log(sidebardata);
 
   const handleChange = (e) => {
+    const { id, value, type, checked } = e.target;
+
     if (
-      e.target.id === "all" ||
-      e.target.id === "rent" ||
-      e.target.id === "sale"
-    ) {
-      setSidebardata({ ...sidebardata, type: e.target.id });
+      id === "all" || id === "rent" || id === "sale") {
+      setSidebardata({ ...sidebardata, type: id });
     }
-    if (e.target.id === "propertyType") {
-      setSidebardata({ ...sidebardata, propertyType: e.target.value });
+    if (id === "propertyType") {
+      setSidebardata({ ...sidebardata, propertyType: value });
     }
-    if (e.target.id === "subType") {
-      setSidebardata({ ...sidebardata, subType: e.target.value });
+    if (id === "subType") {
+      setSidebardata({ ...sidebardata, subType: value });
     }
-    if (e.target.id === "subSubType") {
-      setSidebardata({ ...sidebardata, subSubType: e.target.value });
+    if (id === "subSubType") {
+      setSidebardata({ ...sidebardata, subSubType: value });
     }
-    if (e.target.id === "searchTerm") {
-      setSidebardata({ ...sidebardata, searchTerm: e.target.value });
+    if (id === "searchTerm") {
+      setSidebardata({ ...sidebardata, searchTerm: value });
     }
-    if (e.target.id === "city") {
-      setSidebardata({ ...sidebardata, city: e.target.value });
+    if (id === "city") {
+      setSidebardata({ ...sidebardata, city: value });
     }
     if (
-      e.target.id === "parking" ||
-      e.target.id === "furnished" ||
-      e.target.id === "balcony" ||
-      e.target.id === "offer"
-    ) {
+      id === "parking" || id === "furnished" || id === "balcony" || id === "offer") {
       setSidebardata({
         ...sidebardata,
-        [e.target.id]:
-          e.target.checked || e.target.checked === "true" ? true : false,
+        [id]: checked || checked === "true" ? true : false,
       });
     }
     // if (
@@ -183,6 +183,12 @@ export default function Search() {
     //     },
     //   });
     // }
+    if (id === "minPrice" || id === "maxPrice") {
+      const priceValue = Number(value);
+      setSidebardata((prev) => ({
+        ...prev,
+        [id]: priceValue, }));
+    }
 
     if (e.target.id === "sort_order") {
       const sort = e.target.value.split("_")[0] || "created_at";
@@ -208,6 +214,8 @@ export default function Search() {
     urlParams.set("parking", sidebardata.parking);
     urlParams.set("furnished", sidebardata.furnished);
     urlParams.set("balcony", sidebardata.balcony);
+    urlParams.set("minPrice", sidebardata.minPrice);
+    urlParams.set("maxPrice", sidebardata.maxPrice);
     // urlParams.set("pool", sidebardata.facilities.pool);
     // urlParams.set("playArea", sidebardata.facilities.playArea);
     // urlParams.set("gymnasium", sidebardata.facilities.gymnasium);
@@ -225,9 +233,9 @@ export default function Search() {
     const urlParams = new URLSearchParams(location.search);
     urlParams.set("startIndex", startIndex);
     const searchQuery = urlParams.toString();
-    const res =await fetch(`/api/listing/get?${searchQuery}`);
+    const res = await fetch(`/api/listing/get?${searchQuery}`);
     const data = await res.json();
-    if(data.length < 9){
+    if (data.length < 9) {
       setShowMore(false);
     }
     setListings([...listings, ...data]);
@@ -236,157 +244,161 @@ export default function Search() {
   return (
     <div className="flex flex-col md:flex-row pt-[80px]">
       <div className="p-5 border-b-2 md:border-r-2 md:min-h-screen w-full md:w-[400px]">
-      <div className="lg:sticky lg:top-[90px] p-3">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-          <div className="flex items-center gap-2">
-            <label className="whitespace-nowrap font-semibold">
-              Search Term:
-            </label>
-            <input
-              type="text"
-              id="searchTerm"
-              placeholder="Search..."
-              className="border rounded-lg p-3 w-full"
-              value={sidebardata.searchTerm}
-              onChange={handleChange}
-            ></input>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label className="font-semibold">Property Type:</label>
-            <select
-              id="propertyType"
-              onChange={handleChange}
-              value={sidebardata.propertyType}
-              className="border rounded-lg p-3"
-            >
-              <option value="all">All</option>
-              <option value="residential">Residential</option>
-              <option value="commercial">Commercial</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label className="font-semibold">Subtype:</label>
-            <select
-              id="subType"
-              onChange={handleChange}
-              value={sidebardata.subType}
-              className="border rounded-lg p-3"
-            >
-              <option value="">All</option>
-              {sidebardata.propertyType === "residential" && (
-                <>
-    
-                  <option value="Apartment/Flat">Apartment/Flat</option>
-                  <option value="Villa">Independent House/ Villa</option>
-                  <option value="Builder Floor">Builder Floor</option>
-                  <option value="PG/Co-Living">PG/Co-Living</option>
-                  <option value="1 RK/ Studio Apartment">1 RK/ Studio Apartment</option>
-                  <option value="Serviced Apartment">Serviced Apartment</option>
-                  <option value="Farmhouse">Farmhouse</option>
-                  <option value="Other">Other</option>
-                </>
-              )}
-
-              {sidebardata.propertyType === "commercial" && (
-                <>
-                  <option value="Office">Office</option>
-                  <option value="Retail">Retail</option>
-                  <option value="Plots/ Land">Plots/ Land</option>
-                  <option value="Storage">Storage</option>
-                  <option value="Industry">Industry</option>
-                  <option value="Hospitality">Hospitality</option>
-                  <option value="Other">Other</option>
-                </>
-              )}
-            </select>
-          </div>
-
-          {subSubTypeOptions[sidebardata.subType] &&
-            subSubTypeOptions[sidebardata.subType].length > 0 && (<div className="flex items-center gap-2">
-              <label className="font-semibold">SubSubtype:</label>
-              <select
-                id="subSubType"
+        <div className="lg:sticky lg:top-[90px] p-3">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+            <div className="flex items-center gap-2">
+              <label className="whitespace-nowrap font-semibold">
+                Search Term:
+              </label>
+              <input
+                type="text"
+                id="searchTerm"
+                placeholder="Search..."
+                className="border rounded-lg p-3 w-full"
+                value={sidebardata.searchTerm}
                 onChange={handleChange}
-                value={sidebardata.subSubType}
+              ></input>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="font-semibold">Property Type:</label>
+              <select
+                id="propertyType"
+                onChange={handleChange}
+                value={sidebardata.propertyType}
+                className="border rounded-lg p-3"
+              >
+                <option value="all">All</option>
+                <option value="residential">Residential</option>
+                <option value="commercial">Commercial</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="font-semibold">Subtype:</label>
+              <select
+                id="subType"
+                onChange={handleChange}
+                value={sidebardata.subType}
                 className="border rounded-lg p-3"
               >
                 <option value="">All</option>
-                {subSubTypeOptions[sidebardata.subType] &&
-                  subSubTypeOptions[sidebardata.subType].map((option) => (
-                    <option key={option} value={option}>
-                      {option}
+                {sidebardata.propertyType === "residential" && (
+                  <>
+                    <option value="Apartment/Flat">Apartment/Flat</option>
+                    <option value="Villa">Independent House/ Villa</option>
+                    <option value="Builder Floor">Builder Floor</option>
+                    <option value="PG/Co-Living">PG/Co-Living</option>
+                    <option value="1 RK/ Studio Apartment">
+                      1 RK/ Studio Apartment
                     </option>
-                  ))}
+                    <option value="Serviced Apartment">
+                      Serviced Apartment
+                    </option>
+                    <option value="Farmhouse">Farmhouse</option>
+                    <option value="Other">Other</option>
+                  </>
+                )}
+
+                {sidebardata.propertyType === "commercial" && (
+                  <>
+                    <option value="Office">Office</option>
+                    <option value="Retail">Retail</option>
+                    <option value="Plots/ Land">Plots/ Land</option>
+                    <option value="Storage">Storage</option>
+                    <option value="Industry">Industry</option>
+                    <option value="Hospitality">Hospitality</option>
+                    <option value="Other">Other</option>
+                  </>
+                )}
               </select>
             </div>
-          )}
 
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="font-semibold">Type:</label>
+            {subSubTypeOptions[sidebardata.subType] &&
+              subSubTypeOptions[sidebardata.subType].length > 0 && (
+                <div className="flex items-center gap-2">
+                  <label className="font-semibold">SubSubtype:</label>
+                  <select
+                    id="subSubType"
+                    onChange={handleChange}
+                    value={sidebardata.subSubType}
+                    className="border rounded-lg p-3"
+                  >
+                    <option value="">All</option>
+                    {subSubTypeOptions[sidebardata.subType] &&
+                      subSubTypeOptions[sidebardata.subType].map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
 
-            <div className="flex gap-2">
-              <input
-                type="checkbox"
-                id="all"
-                className="w-5"
-                onChange={handleChange}
-                checked={sidebardata.type === "all"}
-              ></input>
-              <span>Rent & Sale</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="font-semibold">Type:</label>
+
+              <div className="flex gap-2">
+                <input
+                  type="checkbox"
+                  id="all"
+                  className="w-5"
+                  onChange={handleChange}
+                  checked={sidebardata.type === "all"}
+                ></input>
+                <span>Rent & Sale</span>
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="checkbox"
+                  id="rent"
+                  className="w-5"
+                  onChange={handleChange}
+                  checked={sidebardata.type === "rent"}
+                />
+                <span>Rent</span>
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="checkbox"
+                  id="sale"
+                  className="w-5"
+                  onChange={handleChange}
+                  checked={sidebardata.type === "sale"}
+                ></input>
+                <span>Sale</span>
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="checkbox"
+                  id="offer"
+                  className="w-5"
+                  onChange={handleChange}
+                  checked={sidebardata.offer}
+                ></input>
+                <span>Offer</span>
+              </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              <label className="whitespace-nowrap font-semibold">City:</label>
               <input
-                type="checkbox"
-                id="rent"
-                className="w-5"
+                type="text"
+                id="city"
+                placeholder="Enter city..."
+                className="border rounded-lg p-3 w-full"
+                value={sidebardata.city}
                 onChange={handleChange}
-                checked={sidebardata.type === "rent"}
               />
-              <span>Rent</span>
             </div>
 
-            <div className="flex gap-2">
-              <input
-                type="checkbox"
-                id="sale"
-                className="w-5"
-                onChange={handleChange}
-                checked={sidebardata.type === "sale"}
-              ></input>
-              <span>Sale</span>
-            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="font-semibold">Amenities:</label>
 
-            <div className="flex gap-2">
-              <input
-                type="checkbox"
-                id="offer"
-                className="w-5"
-                onChange={handleChange}
-                checked={sidebardata.offer}
-              ></input>
-              <span>Offer</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label className="whitespace-nowrap font-semibold">City:</label>
-            <input
-              type="text"
-              id="city"
-              placeholder="Enter city..."
-              className="border rounded-lg p-3 w-full"
-              value={sidebardata.city}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="font-semibold">Amenities:</label>
-
-            {/* <div className="flex gap-2">
+              {/* <div className="flex gap-2">
               <input
                 type="checkbox"
                 id="pool"
@@ -397,39 +409,70 @@ export default function Search() {
               <span>Swimming Pool</span>
             </div> */}
 
-            <div className="flex gap-2">
-              <input
-                type="checkbox"
-                id="parking"
-                className="w-5"
-                onChange={handleChange}
-                checked={sidebardata.parking}
-              ></input>
-              <span>Parking</span>
+              <div className="flex gap-2">
+                <input
+                  type="checkbox"
+                  id="parking"
+                  className="w-5"
+                  onChange={handleChange}
+                  checked={sidebardata.parking}
+                ></input>
+                <span>Parking</span>
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="checkbox"
+                  id="furnished"
+                  className="w-5"
+                  onChange={handleChange}
+                  checked={sidebardata.furnished}
+                ></input>
+                <span>Furnished</span>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="checkbox"
+                  id="balcony"
+                  className="w-5"
+                  onChange={handleChange}
+                  checked={sidebardata.balcony}
+                ></input>
+                <span>Balcony</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-4">
+              <label className="font-semibold">
+                Price Range: 
+                ₹{sidebardata.minPrice.toLocaleString("en-IN")} – ₹
+                {sidebardata.maxPrice.toLocaleString("en-IN")}
+              </label>
+
+              <div className="flex items-center gap-4">
+                <input
+                  type="range"
+                  id="minPrice"
+                  min="10000"
+                  max="10000000"
+                  step="10000"
+                  value={sidebardata.minPrice}
+                  onChange={handleChange}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                />
+                <input
+                  type="range"
+                  id="maxPrice"
+                  min="50000"
+                  max="10000000"
+                  step="50000"
+                  value={sidebardata.maxPrice}
+                  onChange={handleChange}
+                  className="w-full"
+                />
+              </div>
             </div>
 
-            <div className="flex gap-2">
-              <input
-                type="checkbox"
-                id="furnished"
-                className="w-5"
-                onChange={handleChange}
-                checked={sidebardata.furnished}
-              ></input>
-              <span>Furnished</span>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="checkbox"
-                id="balcony"
-                className="w-5"
-                onChange={handleChange}
-                checked={sidebardata.balcony}
-              ></input>
-              <span>Balcony</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
             <label className="font-semibold">Sort:</label>
             <select
               onChange={handleChange}
@@ -443,10 +486,11 @@ export default function Search() {
               <option value="createdAt_Asc"> Oldest</option>
             </select>
           </div>
-          <button className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95">
-            Search
-          </button>
-        </form>
+
+            <button className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95">
+              Search
+            </button>
+          </form>
         </div>
       </div>
 
@@ -454,7 +498,7 @@ export default function Search() {
         <h1 className="text-3xl font-semibold brder-b p-3 text-slate-700 mt-5">
           Listing Results
         </h1>
-        
+
         <div className="p-7 flex flex-wrap gap-4">
           {!loading && listings.length === 0 && (
             <p className="text-xl text-slate-700">No listing found!</p>
@@ -465,9 +509,10 @@ export default function Search() {
             </p>
           )}
           {!loading &&
-            listings && listings.map((listing) => (
+            listings &&
+            listings.map((listing) => (
               <ListingItem key={listing._id} listing={listing} />
-            ))} 
+            ))}
 
           {showMore && (
             <button

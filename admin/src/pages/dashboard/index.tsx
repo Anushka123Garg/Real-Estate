@@ -266,7 +266,7 @@ const Dashboard = (): JSX.Element => {
                           >
                             <td>{listing.name}</td>
                             <td>{listing.street},{listing.city},{listing.state},{listing.pincode}</td>
-                            <td className="price-cell">{listing.regularPrice}</td>
+                            <td className="price-cell">₹{listing.minPrice?.toLocaleString("en-IN")} – ₹{listing.maxPrice?.toLocaleString("en-IN")}</td>
                             <td>{listing.createdAt.split('T')[0]}</td>
                             <td>
                               <FaEye

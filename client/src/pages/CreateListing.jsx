@@ -28,14 +28,14 @@ export default function CreateListing() {
     subSubType: "",
     bedrooms: 1,
     bathrooms: 1,
-    regularPrice: 0,
-    discountPrice: 0,
+    minPrice: 0,
+    maxPrice: 0,
     offer: false,
     parking: false,
     furnished: false,
     balcony: false,
     userIdCard: "", // Add userIdCard field,
-   status: "PENDING",
+    status: "PENDING",
   });
   const residentialSubtypes = [
     "Apartment/Flat",
@@ -80,14 +80,14 @@ export default function CreateListing() {
   // console.log(formData);
 
   useEffect(() => {
-  const delayDebounceFn = setTimeout(() => {
-    if (formData.street && formData.city) {
-      fetchAddressDetails();
-    }
-  }, 500); 
+    const delayDebounceFn = setTimeout(() => {
+      if (formData.street && formData.city) {
+        fetchAddressDetails();
+      }
+    }, 500);
 
-  return () => clearTimeout(delayDebounceFn);
-}, [formData.street, formData.city]);
+    return () => clearTimeout(delayDebounceFn);
+  }, [formData.street, formData.city]);
 
   const handleImageSubmit = (e) => {
     if (files.length > 0 && files.length + formData.imageUrls.length < 7) {
@@ -146,46 +146,46 @@ export default function CreateListing() {
   };
 
   // Add after the storeImage function
-const handleIdCardUpload = async (e) => {
-  const file = e.target.files[0];
-  
-  if (!file) return;
-  
-  setUploading(true);
-  setError(false);
-  
-  try {
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + "-idcard-" + file.name;
-    const storageRef = ref(storage, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-    
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress = 
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log(`ID Card upload is ${progress}% done`);
-      },
-      (error) => {
-        setError("ID Card upload failed (2 mb max)");
-        setUploading(false);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setFormData({
-            ...formData,
-            userIdCard: downloadURL,
-          });
+  const handleIdCardUpload = async (e) => {
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    setUploading(true);
+    setError(false);
+
+    try {
+      const storage = getStorage(app);
+      const fileName = new Date().getTime() + "-idcard-" + file.name;
+      const storageRef = ref(storage, fileName);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`ID Card upload is ${progress}% done`);
+        },
+        (error) => {
+          setError("ID Card upload failed (2 mb max)");
           setUploading(false);
-        });
-      }
-    );
-  } catch (error) {
-    setError("Error uploading ID card");
-    setUploading(false);
-  }
-};
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            setFormData({
+              ...formData,
+              userIdCard: downloadURL,
+            });
+            setUploading(false);
+          });
+        }
+      );
+    } catch (error) {
+      setError("Error uploading ID card");
+      setUploading(false);
+    }
+  };
 
   const handleRemoveImage = (index) => {
     setFormData({
@@ -229,7 +229,7 @@ const handleIdCardUpload = async (e) => {
       });
     }
     if (id === "subType") {
-      setFormData({ ...formData, subType: value, subSubType: "", });
+      setFormData({ ...formData, subType: value, subSubType: "" });
     }
     if (id === "subSubType") {
       setFormData({ ...formData, subSubType: value });
@@ -240,72 +240,85 @@ const handleIdCardUpload = async (e) => {
     if (!formData.pincode || formData.pincode.length < 6) {
       return alert("Please enter a valid pincode before fetching address.");
     }
-  
+
     try {
-      const response = await axios.get(`https://api.postalpincode.in/pincode/${formData.pincode}`);
-  
-      if (response.data && response.data[0].PostOffice && response.data[0].PostOffice[0]) {
+      const response = await axios.get(
+        `https://api.postalpincode.in/pincode/${formData.pincode}`
+      );
+
+      if (
+        response.data &&
+        response.data[0].PostOffice &&
+        response.data[0].PostOffice[0]
+      ) {
         const place = response.data[0].PostOffice[0];
-        const city = place.District; 
+        const city = place.District;
         const state = place.State;
-        
+
         setFormData((prev) => ({
           ...prev,
           city: city || "",
           state: state || "",
         }));
       } else {
-        alert("Could not fetch city/state from the given pincode. Please fill manually.");
+        alert(
+          "Could not fetch city/state from the given pincode. Please fill manually."
+        );
       }
     } catch (error) {
       console.error("Error fetching address:", error);
-      alert("Failed to fetch address. Please check your pincode or try again later.");
+      alert(
+        "Failed to fetch address. Please check your pincode or try again later."
+      );
     }
   };
-  
-// Modify the handleSubmit function to include validation for userIdCard
-const handleSubmit = async (e) => {
-  e.preventDefault();
 
-  try {
-    if (formData.imageUrls.length === 0)
-      return setError("You must upload at least one image");
-    if (+formData.regularPrice < +formData.discountPrice)
-      return setError("Discount Price must be lower than regular Price");
-    if (!formData.userIdCard)
-      return setError("You must upload an ID card for verification");
+  // Modify the handleSubmit function to include validation for userIdCard
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    setLoading(true);
-    setError(false); //remove the previous error
-    const res = await fetch("/api/listing/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...formData,
-        userRef: currentUser._id,
-      }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (data.success === false) {
-      setError(data.message);
+    try {
+      if (formData.imageUrls.length === 0)
+        return setError("You must upload at least one image");
+      if (+formData.maxPrice < +formData.minPrice)
+        return setError("minimum Price must be lower than maximum Price");
+      if (!formData.userIdCard)
+        return setError("You must upload an ID card for verification");
+
+      setLoading(true);
+      setError(false); //remove the previous error
+      const res = await fetch("/api/listing/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          userRef: currentUser._id,
+        }),
+      });
+      const data = await res.json();
+      setLoading(false);
+      if (data.success === false) {
+        setError(data.message);
+      }
+      navigate(`/listing/${data._id}`);
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
     }
-    navigate(`/listing/${data._id}`);
-  } catch (error) {
-    setError(error.message);
-    setLoading(false);
-  }
-  console.log(formData);
-};
+    console.log(formData);
+  };
   return (
-    <main className="p-3 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-semibold text-center my-7">
+    <main className="p-2 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-semibold text-center mt-20">
         Create a Listing
       </h1>
 
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col sm:flex-row gap-4 my-10"
+      >
         <div className="flex flex-col gap-4 flex-1">
           <input
             type="text"
@@ -421,7 +434,7 @@ const handleSubmit = async (e) => {
             onChange={handleChange}
             value={formData.state}
           />
-          
+
           <div className="flex gap-6 flex-wrap">
             <div className="flex gap-2">
               <input
@@ -530,37 +543,35 @@ const handleSubmit = async (e) => {
             <div className="flex items-center gap-2">
               <input
                 type="number"
-                id="regularPrice"
-                min="50"
-                max="1000000"
+                id="minPrice"
+                min="10000"
+                max="100000000"
                 required
                 className="p-3 border-gray-300 rounded-lg"
                 onChange={handleChange}
-                checked={formData.regularPrice}
+                checked={formData.minPrice}
               />
               <div className="flex flex-col items-center">
-                <p>Regular Price</p>
-                <span className="text-xs">($ / month)</span>
+                <p>Min. Price</p>
+                <span className="text-xs">(₹ / month)</span>
               </div>
             </div>
-            {formData.offer && (
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  id="discountPrice"
-                  min="0"
-                  max="100000"
-                  required
-                  className="p-3 border-gray-300 rounded-lg"
-                  onChange={handleChange}
-                  checked={formData.discountPrice}
-                />
-                <div className="flex flex-col items-center">
-                  <p>Discounted Price</p>
-                  <span className="text-xs">($ / month)</span>
-                </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                id="maxPrice"
+                min="20000"
+                max="100000000"
+                required
+                className="p-3 border-gray-300 rounded-lg"
+                onChange={handleChange}
+                checked={formData.maxPrice}
+              />
+              <div className="flex flex-col items-center">
+                <p>Max Price</p>
+                <span className="text-xs">(₹ / month)</span>
               </div>
-            )}
+            </div>
           </div>
 
           <p className="font-semibold mt-4">
@@ -612,43 +623,42 @@ const handleSubmit = async (e) => {
               </div>
             ))}
 
+          <p className="font-semibold mt-4">
+            ID Card Verification:
+            <span className="font-normal text-gray-600 ml-2">
+              Upload your ID card for verification
+            </span>
+          </p>
 
-<p className="font-semibold mt-4">
-  ID Card Verification:
-  <span className="font-normal text-gray-600 ml-2">
-    Upload your ID card for verification
-  </span>
-</p>
+          <div className="flex gap-4">
+            <input
+              onChange={handleIdCardUpload}
+              className="p-3 border border-gray-300 rounded w-full"
+              type="file"
+              id="userIdCard"
+              accept="image/*"
+            />
+            {formData.userIdCard && (
+              <span className="text-green-500 self-center">✓ Uploaded</span>
+            )}
+          </div>
 
-<div className="flex gap-4">
-  <input
-    onChange={handleIdCardUpload}
-    className="p-3 border border-gray-300 rounded w-full"
-    type="file"
-    id="userIdCard"
-    accept="image/*"
-  />
-  {formData.userIdCard && (
-    <span className="text-green-500 self-center">✓ Uploaded</span>
-  )}
-</div>
-
-{formData.userIdCard && (
-  <div className="flex justify-between p-3 border items-center">
-    <img
-      src={formData.userIdCard}
-      alt="ID Card"
-      className="w-20 h-20 object-contain rounded-lg"
-    />
-    <button
-      type="button"
-      onClick={() => setFormData({...formData, userIdCard: ""})}
-      className="p-3 text-red-700 rounded-lg uppercase hover:opacity-75"
-    >
-      Delete
-    </button>
-  </div>
-)}
+          {formData.userIdCard && (
+            <div className="flex justify-between p-3 border items-center">
+              <img
+                src={formData.userIdCard}
+                alt="ID Card"
+                className="w-20 h-20 object-contain rounded-lg"
+              />
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, userIdCard: "" })}
+                className="p-3 text-red-700 rounded-lg uppercase hover:opacity-75"
+              >
+                Delete
+              </button>
+            </div>
+          )}
 
           <button
             disabled={loading || uploading}

@@ -29,8 +29,8 @@ export default function CreateListing() {
     type: "rent",
     bedrooms: 1,
     bathrooms: 1,
-    regularPrice: 0,
-    discountPrice: 0,
+    minPrice: 0,
+    maxPrice: 0,
     offer: false,
     parking: false,
     furnished: false,
@@ -187,7 +187,7 @@ export default function CreateListing() {
         [e.target.id]: e.target.value,
       });
     }
-    if (id === "propertyType") {
+    if (e.target.id === "propertyType") {
       setFormData({
         ...formData,
         propertyType: value,
@@ -195,10 +195,10 @@ export default function CreateListing() {
         subSubType: "",
       });
     }
-    if (id === "subType") {
+    if (e.target.id === "subType") {
       setFormData({ ...formData, subType: value, subSubType: "" });
     }
-    if (id === "subSubType") {
+    if (e.target.id === "subSubType") {
       setFormData({ ...formData, subSubType: value, subSubType: "" });
     }
   };
@@ -207,26 +207,36 @@ export default function CreateListing() {
     if (!formData.pincode || formData.pincode.length < 6) {
       return alert("Please enter a valid pincode before fetching address.");
     }
-  
+
     try {
-      const response = await axios.get(`https://api.postalpincode.in/pincode/${formData.pincode}`);
-  
-      if (response.data && response.data[0].PostOffice && response.data[0].PostOffice[0]) {
+      const response = await axios.get(
+        `https://api.postalpincode.in/pincode/${formData.pincode}`
+      );
+
+      if (
+        response.data &&
+        response.data[0].PostOffice &&
+        response.data[0].PostOffice[0]
+      ) {
         const place = response.data[0].PostOffice[0];
-        const city = place.District; 
+        const city = place.District;
         const state = place.State;
-        
+
         setFormData((prev) => ({
           ...prev,
           city: city || "",
           state: state || "",
         }));
       } else {
-        alert("Could not fetch city/state from the given pincode. Please fill manually.");
+        alert(
+          "Could not fetch city/state from the given pincode. Please fill manually."
+        );
       }
     } catch (error) {
       console.error("Error fetching address:", error);
-      alert("Failed to fetch address. Please check your pincode or try again later.");
+      alert(
+        "Failed to fetch address. Please check your pincode or try again later."
+      );
     }
   };
 
@@ -236,8 +246,8 @@ export default function CreateListing() {
     try {
       if (formData.imageUrls.length < 0)
         return setError("You must upload at least one image");
-      if (+formData.regularPrice < +formData.discountPrice)
-        return setError("Discount Price must be lower than regular Price");
+      if (+formData.maxPrice < +formData.minPrice)
+        return setError("minimum Price must be lower than maximum Price");
 
       if (!formData.userIdCard)
         return setError("You must upload an ID card for verification");
@@ -270,22 +280,22 @@ export default function CreateListing() {
 
   const handleIdCardUpload = async (e) => {
     const file = e.target.files[0];
-    
+
     if (!file) return;
-    
+
     setUploading(true);
     setError(false);
-    
+
     try {
       const storage = getStorage(app);
       const fileName = new Date().getTime() + "-idcard-" + file.name;
       const storageRef = ref(storage, fileName);
       const uploadTask = uploadBytesResumable(storageRef, file);
-      
+
       uploadTask.on(
         "state_changed",
         (snapshot) => {
-          const progress = 
+          const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           console.log(`ID Card upload is ${progress}% done`);
         },
@@ -309,14 +319,16 @@ export default function CreateListing() {
     }
   };
 
-
   return (
     <main className="p-3 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-semibold text-center my-7">
+      <h1 className="text-3xl font-semibold text-center mt-20">
         Update a Listing
       </h1>
 
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col sm:flex-row gap-4 my-10"
+      >
         <div className="flex flex-col gap-4 flex-1">
           <input
             type="text"
@@ -539,37 +551,35 @@ export default function CreateListing() {
             <div className="flex items-center gap-2">
               <input
                 type="number"
-                id="regularPrice"
-                min="50"
-                max="1000000"
+                id="minPrice"
+                min="10000"
+                max="100000000"
                 required
                 className="p-3 border-gray-300 rounded-lg"
                 onChange={handleChange}
-                value={formData.regularPrice || ""}
+                value={formData.minPrice || ""}
               />
               <div className="flex flex-col items-center">
-                <p>Regular Price</p>
-                <span className="text-xs">($ / month)</span>
+                <p>Min. Price</p>
+                <span className="text-xs">(₹ / month)</span>
               </div>
             </div>
-            {formData.offer && (
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  id="discountPrice"
-                  min="0"
-                  max="100000"
-                  required
-                  className="p-3 border-gray-300 rounded-lg"
-                  onChange={handleChange}
-                  value={formData.discountPrice}
-                />
-                <div className="flex flex-col items-center">
-                  <p>Discounted Price</p>
-                  <span className="text-xs">($ / month)</span>
-                </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                id="maxPrice"
+                min="20000"
+                max="100000000"
+                required
+                className="p-3 border-gray-300 rounded-lg"
+                onChange={handleChange}
+                value={formData.maxPrice}
+              />
+              <div className="flex flex-col items-center">
+                <p>Max. Price</p>
+                <span className="text-xs">(₹ / month)</span>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -623,42 +633,42 @@ export default function CreateListing() {
               </div>
             ))}
 
-<p className="font-semibold mt-4">
-  ID Card Verification:
-  <span className="font-normal text-gray-600 ml-2">
-    Upload your ID card for verification
-  </span>
-</p>
+          <p className="font-semibold mt-4">
+            ID Card Verification:
+            <span className="font-normal text-gray-600 ml-2">
+              Upload your ID card for verification
+            </span>
+          </p>
 
-<div className="flex gap-4">
-  <input
-    onChange={handleIdCardUpload}
-    className="p-3 border border-gray-300 rounded w-full"
-    type="file"
-    id="userIdCard"
-    accept="image/*"
-  />
-  {formData.userIdCard && (
-    <span className="text-green-500 self-center">✓ Uploaded</span>
-  )}
-</div>
+          <div className="flex gap-4">
+            <input
+              onChange={handleIdCardUpload}
+              className="p-3 border border-gray-300 rounded w-full"
+              type="file"
+              id="userIdCard"
+              accept="image/*"
+            />
+            {formData.userIdCard && (
+              <span className="text-green-500 self-center">✓ Uploaded</span>
+            )}
+          </div>
 
-{formData.userIdCard && (
-  <div className="flex justify-between p-3 border items-center">
-    <img
-      src={formData.userIdCard}
-      alt="ID Card"
-      className="w-20 h-20 object-contain rounded-lg"
-    />
-    <button
-      type="button"
-      onClick={() => setFormData({...formData, userIdCard: ""})}
-      className="p-3 text-red-700 rounded-lg uppercase hover:opacity-75"
-    >
-      Delete
-    </button>
-  </div>
-)}
+          {formData.userIdCard && (
+            <div className="flex justify-between p-3 border items-center">
+              <img
+                src={formData.userIdCard}
+                alt="ID Card"
+                className="w-20 h-20 object-contain rounded-lg"
+              />
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, userIdCard: "" })}
+                className="p-3 text-red-700 rounded-lg uppercase hover:opacity-75"
+              >
+                Delete
+              </button>
+            </div>
+          )}
 
           <button
             disabled={loading || uploading}

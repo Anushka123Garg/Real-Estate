@@ -25,11 +25,11 @@ const listingschema = new mongoose.Schema(
         subSubType: {
             type: String,
         },
-        regularPrice: {
+        minPrice: {
             type: Number,
             required: true,
         },
-        discountPrice: {
+        maxPrice: {
             type: Number,
             required: true,
         },
@@ -68,10 +68,10 @@ const listingschema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        offer: {
-            type: Boolean,
-            required: true,
-        },
+        // offer: {
+        //     type: Boolean,
+        //     required: true,
+        // },
         imageUrls: {
             type: Array,
             required: true,

@@ -17,17 +17,17 @@ const Search = lazy(() => import("./pages/Search"));
 
 export default function App() {
   useEffect(() => {
-    const fetchTokenAndInitVoiceflow = async () => {
-      try {
-        const res = await fetch("/api/auth/me", {
-          method: "GET",
-          credentials: "include",
-        });
+    // const fetchTokenAndInitVoiceflow = async () => {
+    //   try {
+    //     const res = await fetch("/api/auth/me", {
+    //       method: "GET",
+    //       credentials: "include",
+    //     });
 
-        if (res.ok) {
-          const data = await res.json();
-          const token = data.token;
-          console.log(token);
+    //     if (res.ok) {
+    //       const data = await res.json();
+    //       const token = data.token;
+    //       console.log(token);
 
           const script = document.createElement("script");
           script.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs";
@@ -38,9 +38,9 @@ export default function App() {
 
             if (window.voiceflow) {
               window.voiceflow.chat.load({
-                verify: { projectID: "67a46497a2b7fc2b71d1fa5f" },
+                verify: { projectID: "6814a72887a54c892142a84c" },
                 url: "https://general-runtime.voiceflow.com",
-                versionID: "67a46497a2b7fc2b71d1fa60",  
+                versionID: "6814a72887a54c892142a84d",  
                 // launch: {event :{type: "launch", payload: {auth_token: token}}},
                 assistant: {
                   persistence: "localStorage",
@@ -50,21 +50,21 @@ export default function App() {
           };
 
           document.body.appendChild(script);
-        } else {
-          console.log(
-            "User not authenticated. Voiceflow loaded without token."
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching token or loading Voiceflow:", error);
-      }
-    };
-    fetchTokenAndInitVoiceflow();
+    //     } else {
+    //       console.log(
+    //         "User not authenticated. Voiceflow loaded without token."
+    //       );
+    //     }
+    //   } catch (error) {
+    //     console.error("Error fetching token or loading Voiceflow:", error);
+    //   }
+    // };
+    // fetchTokenAndInitVoiceflow();
 
     return () => {
       document.body.removeChild(script); // Cleanup on unmount
     };
-  }, []);
+  }, []);   
 
   return (
     <BrowserRouter>
