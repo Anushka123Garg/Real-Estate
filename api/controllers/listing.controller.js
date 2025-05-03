@@ -169,7 +169,6 @@ export const getListings = async (req, res, next) => {
     //   'facilities.pool': parseBool(req.query.pool),
     // };
 
-
     let type = req.query.type;
 
     if (type === undefined || type === "all") {
@@ -194,7 +193,8 @@ export const getListings = async (req, res, next) => {
 
     const searchTerm = req.query.searchTerm || "";
 
-    const sort = req.query.sort || "createdAt";
+    const minPrice = req.query.minPrice ? parseInt(req.query.minPrice) : 0;
+    const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice) : Number.MAX_SAFE_INTEGER;
 
     const order = req.query.order || "desc";
 
@@ -209,15 +209,17 @@ export const getListings = async (req, res, next) => {
       ...cityFilter,
       ...propertyTypeFilter,
       ...subTypeFilter,
-      ...subSubTypeFilter
+      ...subSubTypeFilter,
+      minPrice: { $gte: minPrice },
+      maxPrice: { $lte: maxPrice }
     })
-      .sort({ [sort]: order })
       .limit(limit)
       .skip(startIndex);
 
-    console.log("Query Filters:", { propertyTypeFilter, subTypeFilter });
+    // console.log("Query Filters:", { propertyTypeFilter, subTypeFilter });
 
-    console.log("Fetched Listings from DB:", listings);
+    // console.log("Fetched Listings from DB:", listings);
+    // console.log("Min:", minPrice, "Max:", maxPrice);
 
     return res.status(200).json(listings);
   } catch (error) {
