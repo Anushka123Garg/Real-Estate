@@ -65,7 +65,7 @@ export const getListing = async (req, res, next) => {
 
 export const getPendingListings = async (req, res, next) => {
   try {
-    const listings = await Listing.find({ status: 'PENDING' });
+    const listings = await Listing.find({ status: "PENDING" });
     if (!listings) {
       return next(errorHandler(404, "No pending listings found!"));
     }
@@ -74,7 +74,6 @@ export const getPendingListings = async (req, res, next) => {
     next(error);
   }
 };
-
 
 // ...existing code...
 
@@ -88,18 +87,18 @@ export const approveListing = async (req, res, next) => {
 
     const updatedListing = await Listing.findByIdAndUpdate(
       req.params.id,
-      { status: 'APPROVED' },
+      { status: "APPROVED" },
       { new: true }
     );
 
     res.status(200).json({
       success: true,
       message: "Listing has been approved",
-      listing: updatedListing
+      listing: updatedListing,
     });
   } catch (error) {
     console.log(error);
-    
+
     next(error);
   }
 };
@@ -118,8 +117,8 @@ export const rejectListing = async (req, res, next) => {
     const updatedListing = await Listing.findByIdAndUpdate(
       req.params.id,
       {
-        status: 'REJECTED',
-        comment: rejectionReason
+        status: "REJECTED",
+        comment: rejectionReason,
       },
       { new: true }
     );
@@ -127,13 +126,12 @@ export const rejectListing = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Listing has been rejected",
-      listing: updatedListing
+      listing: updatedListing,
     });
   } catch (error) {
     next(error);
   }
 };
-
 
 export const getListings = async (req, res, next) => {
   try {
@@ -141,9 +139,6 @@ export const getListings = async (req, res, next) => {
     const startIndex = parseInt(req.query.startIndex) || 0;
     let offer = req.query.offer;
 
-    if (offer === undefined || offer === "false") {
-      offer = { $in: [false, true] };
-    }
     let furnished = req.query.furnished;
 
     if (furnished === undefined || furnished === "false") {
@@ -160,41 +155,45 @@ export const getListings = async (req, res, next) => {
       balcony = { $in: [false, true] };
     }
 
-    // const parseBool = (val) => val === "true" ? true : val === "false" ? false : { $in: [false, true] };
-
-    // const query = {
-    //   'facilities.gymnasium': parseBool(req.query.gymnasium),
-    //   'facilities.playArea': parseBool(req.query.playArea),
-    //   'facilities.games': parseBool(req.query.games),
-    //   'facilities.pool': parseBool(req.query.pool),
-    // };
-
     let type = req.query.type;
 
     if (type === undefined || type === "all") {
       type = { $in: ["sale", "rent"] };
     }
 
-    const propertyTypeFilter = req.query.propertyType && req.query.propertyType.toLowerCase() !== "all"
-      ? { propertyType: { $regex: `^${req.query.propertyType}$`, $options: "i" } }
-      : {};
+    const propertyTypeFilter =
+      req.query.propertyType && req.query.propertyType.toLowerCase() !== "all"
+        ? {
+            propertyType: {
+              $regex: `^${req.query.propertyType}$`,
+              $options: "i",
+            },
+          }
+        : {};
 
-    const subTypeFilter = req.query.subType && req.query.subType.toLowerCase() !== "all"
-      ? { subType: { $regex: `^${req.query.subType}$`, $options: "i" } }
-      : {};
+    const subTypeFilter =
+      req.query.subType && req.query.subType.toLowerCase() !== "all"
+        ? { subType: { $regex: `^${req.query.subType}$`, $options: "i" } }
+        : {};
 
-    const subSubTypeFilter = req.query.subSubType && req.query.subSubType.trim() !== "" && req.query.subSubType.toLowerCase() !== "all"
-      ? { subSubType: { $regex: `^${req.query.subSubType}$`, $options: "i" } }
-      : {};
+    const subSubTypeFilter =
+      req.query.subSubType &&
+      req.query.subSubType.trim() !== "" &&
+      req.query.subSubType.toLowerCase() !== "all"
+        ? { subSubType: { $regex: `^${req.query.subSubType}$`, $options: "i" } }
+        : {};
 
-    const cityFilter = req.query.city && req.query.city.toLowerCase() !== "all"
-      ? { city: { $regex: `^${req.query.city}$`, $options: "i" } }
-      : {};
+    const cityFilter =
+      req.query.city && req.query.city.toLowerCase() !== "all"
+        ? { city: { $regex: `^${req.query.city}$`, $options: "i" } }
+        : {};
 
     const searchTerm = req.query.searchTerm || "";
 
     const minPrice = req.query.minPrice ? parseInt(req.query.minPrice) : 0;
-    const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice) : Number.MAX_SAFE_INTEGER;
+    const maxPrice = req.query.maxPrice
+      ? parseInt(req.query.maxPrice)
+      : Number.MAX_SAFE_INTEGER;
 
     const order = req.query.order || "desc";
 
@@ -210,8 +209,14 @@ export const getListings = async (req, res, next) => {
       ...propertyTypeFilter,
       ...subTypeFilter,
       ...subSubTypeFilter,
-      minPrice: { $gte: minPrice },
-      maxPrice: { $lte: maxPrice }
+      $or: [
+        {
+          $and: [
+            { minPrice: { $lte: maxPrice } },
+            { maxPrice: { $gte: minPrice } },
+          ],
+        },
+      ],
     })
       .limit(limit)
       .skip(startIndex);

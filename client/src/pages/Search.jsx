@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ListingItem from "../components/ListingItem";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
@@ -11,7 +11,7 @@ export default function Search() {
   const PRICE_STEP = 50000;
 
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
   const [sidebardata, setSidebardata] = useState({
     searchTerm: "",
     type: "all",
@@ -263,7 +263,7 @@ export default function Search() {
     try {
       const res = await fetch(`/api/listing/get?${searchQuery}`);
       const data = await res.json();
-      if (data.length < 6) {
+      if (data.length < 9) {
         // Assuming your API returns max 9 per page
         setShowMore(false);
       }

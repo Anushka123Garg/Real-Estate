@@ -10,10 +10,6 @@ const listingschema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        // whyChoose: {
-        //     type: String,
-        //     required: true,
-        // },
         propertyType: {
             type: String,
             required: true,
@@ -57,12 +53,6 @@ const listingschema = new mongoose.Schema(
             type: Boolean,
             required: true,
         },
-        // facilities: {
-        //     gymnasium: { type: Boolean, required: true },
-        //     pool: { type: Boolean, required: true },
-        //     games: { type: Boolean, required: true },
-        //     playArea: { type: Boolean, required: true },
-        // },
         
         type: {         //rent or sale
             type: String,
