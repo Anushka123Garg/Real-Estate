@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import ListingItem from "../components/ListingItem";
 import Slider from "rc-slider";
-import "rc-slider/assets/index.css"; // Keep the base styles
+import "rc-slider/assets/index.css";
 
 export default function Search() {
   const PRICE_MIN = 0;
@@ -11,10 +11,13 @@ export default function Search() {
   const PRICE_STEP = 50000;
 
   const navigate = useNavigate();
-  const location = useLocation(); // Destructure location from useLocation
+  const location = useLocation();
   const [sidebardata, setSidebardata] = useState({
     searchTerm: "",
     type: "all",
+    rent: false,
+    sale: false,
+    all: true,
     city: "",
     propertyType: "",
     subType: "",
@@ -177,53 +180,18 @@ export default function Search() {
     fetchListings();
   }, [location.search]); // Depend on location.search to refetch when URL changes
 
-  // --- Handle Form Input Changes ---
   const handleChange = (e) => {
     const { id, value, type, checked } = e.target;
 
     // Handle type checkboxes
     if (id === "all" || id === "rent" || id === "sale") {
-      // Logic to handle radio-like behavior for 'all', 'rent', 'sale'
-      // If 'all' is checked, uncheck 'rent' and 'sale'
-      // If 'rent' or 'sale' is checked, uncheck 'all'
-      // If both 'rent' and 'sale' are checked, set type to 'all'
       if (id === "all") {
-        setSidebardata({ ...sidebardata, type: "all", offer: false }); // offer implies sale/rent
-      } else if (id === "rent" && checked) {
-        setSidebardata({
-          ...sidebardata,
-          type: "rent",
-          all: false,
-          sale: false,
-        });
-      } else if (id === "sale" && checked) {
-        setSidebardata({
-          ...sidebardata,
-          type: "sale",
-          all: false,
-          rent: false,
-        });
-      } else {
-        // Unchecking rent or sale
-        // If unchecking and it's the only one left, maybe default to all, or handle as needed
-        // For simplicity, if unchecking rent or sale, and the other is not checked, default to 'all'
-        if (id === "rent" && !sidebardata.sale)
-          setSidebardata({ ...sidebardata, type: "all" });
-        if (id === "sale" && !sidebardata.rent)
-          setSidebardata({ ...sidebardata, type: "all" });
-        // If unchecking rent or sale but the other IS checked, do nothing (keep the other type)
+        setSidebardata({ ...sidebardata, type: "all" });
+      } else if (id === "rent") {
+        setSidebardata({ ...sidebardata, type: checked ? "rent" : "all" });
+      } else if (id === "sale") {
+        setSidebardata({ ...sidebardata, type: checked ? "sale" : "all" });
       }
-    }
-    // Handle offer checkbox - it can be combined with rent or sale, but not 'all'
-    if (id === "offer") {
-      // If offer is checked, set type to 'sale' if current type is 'all' (or handle based on your app logic)
-      // If offer is unchecked, keep the current type
-      setSidebardata((prevData) => ({
-        ...prevData,
-        offer: checked,
-        // Optional: Reset type if offer is unchecked and type was only 'offer-based'
-        // type: checked ? (prevData.type === 'all' ? 'sale' : prevData.type) : prevData.type
-      }));
     }
 
     // Handle other inputs (text, select)
@@ -266,29 +234,18 @@ export default function Search() {
     e.preventDefault();
     const urlParams = new URLSearchParams();
     urlParams.set("searchTerm", sidebardata.searchTerm);
-    // Ensure correct type is set based on checkboxes state before generating URL
-    let effectiveType = sidebardata.type;
-    // If 'all' is not checked, check if 'rent' or 'sale' is checked
-    if (effectiveType !== "all") {
-      if (sidebardata.rent && !sidebardata.sale) effectiveType = "rent";
-      else if (!sidebardata.rent && sidebardata.sale) effectiveType = "sale";
-      else if (sidebardata.rent && sidebardata.sale)
-        effectiveType = "all"; // Both checked implies all
-      else effectiveType = "all"; // Neither rent nor sale checked, default to all
-    }
-
-    urlParams.set("type", effectiveType); // Use the determined effectiveType
+    urlParams.set("type", sidebardata.type);
     urlParams.set("city", sidebardata.city);
     urlParams.set("propertyType", sidebardata.propertyType);
     urlParams.set("subType", sidebardata.subType);
     urlParams.set("subSubType", sidebardata.subSubType);
-    urlParams.set("parking", sidebardata.parking.toString()); // Store as string in URL
-    urlParams.set("furnished", sidebardata.furnished.toString()); // Store as string in URL
-    urlParams.set("balcony", sidebardata.balcony.toString()); // Store as string in URL
-    urlParams.set("minPrice", sidebardata.minPrice.toString()); // Store as string in URL
-    urlParams.set("maxPrice", sidebardata.maxPrice.toString()); // Store as string in URL
-    urlParams.set("offer", sidebardata.offer.toString()); // Store as string in URL
-    urlParams.set("order", sidebardata.order); // Store as string in URL
+    urlParams.set("parking", sidebardata.parking.toString());
+    urlParams.set("furnished", sidebardata.furnished.toString());
+    urlParams.set("balcony", sidebardata.balcony.toString());
+    urlParams.set("minPrice", sidebardata.minPrice.toString());
+    urlParams.set("maxPrice", sidebardata.maxPrice.toString());
+    urlParams.set("offer", sidebardata.offer.toString());
+    urlParams.set("order", sidebardata.order);
 
     const searchQuery = urlParams.toString();
     navigate(`/search?${searchQuery}`);
@@ -306,7 +263,7 @@ export default function Search() {
     try {
       const res = await fetch(`/api/listing/get?${searchQuery}`);
       const data = await res.json();
-      if (data.length < 9) {
+      if (data.length < 6) {
         // Assuming your API returns max 9 per page
         setShowMore(false);
       }
@@ -501,31 +458,10 @@ export default function Search() {
                     className="ml-1 text-gray-600 cursor-pointer"
                   >
                     Sale
-                  </label>{" "}
-                  {/* Added label and ml-1 */}
-                </div>
-                {/* Checkbox for 'Offer' - can be independent or tied to sale/rent logic */}
-                <div className="flex items-center gap-1">
-                  {" "}
-                  {/* Adjusted gap */}
-                  <input
-                    type="checkbox"
-                    id="offer"
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer" // Styled checkbox
-                    onChange={handleChange}
-                    checked={sidebardata.offer}
-                  />
-                  <label
-                    htmlFor="offer"
-                    className="ml-1 text-gray-600 cursor-pointer"
-                  >
-                    Offer
-                  </label>{" "}
-                  {/* Added label and ml-1 */}
+                  </label>
                 </div>
               </div>
             </div>
-            {/* City (Optional, but styled better) */}
             <div className="flex flex-col gap-2">
               <label className="font-semibold text-gray-700">City:</label>
               <input
@@ -542,8 +478,6 @@ export default function Search() {
               <label className="font-semibold text-gray-700">Amenities:</label>
               <div className="flex flex-wrap items-center gap-4">
                 {" "}
-                {/* Adjusted gap */}
-                {/* Parking */}
                 <div className="flex items-center gap-1">
                   <input
                     type="checkbox"
@@ -710,22 +644,6 @@ export default function Search() {
                 </select>
               </div>
             </div>
-            {/* Sort Order (Example - Add UI if needed) */}
-            {/* <div className="flex items-center gap-2">
-                  <label className="font-semibold">Sort:</label>
-                   <select
-                      id="order"
-                       onChange={handleChange}
-                       value={sidebardata.order}
-                       className="border rounded-lg p-3"
-                   >
-                       <option value="desc">Latest</option>
-                       <option value="asc">Oldest</option>
-                       <option value="price_desc">Price high to low</option>
-                       <option value="price_asc">Price low to high</option>
-                   </select>
-             </div> */}
-            {/* Search Button */}
             <button className="bg-blue-600 text-white p-3 rounded-lg uppercase hover:bg-blue-700 transition duration-200 shadow-md mt-6">
               {" "}
               {/* Styled button */}
@@ -736,18 +654,10 @@ export default function Search() {
       </div>
       {/* --- Listing Results Area --- */}
       <div className="flex-1 p-4 md:p-6">
-        {" "}
-        {/* Adjusted padding */}
         <h1 className="text-3xl font-bold text-gray-800 border-b border-gray-200 pb-4 mb-6">
-          {" "}
-          {/* Styled heading, adjusted border/padding */}
           Listing Results
         </h1>
-        {/* Listings Grid */}
-        {/* THIS IS THE CONTAINER WITH THE GAP CLASS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-50">
-          {" "}
-          {/* Responsive grid layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10">
           {!loading && listings.length === 0 && (
             <p className="text-xl text-gray-600 text-center col-span-full">
               {" "}
