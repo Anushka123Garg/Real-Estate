@@ -33,7 +33,7 @@ export default function Search() {
 
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
-  const [showMore, setShowMore] = useState(false);
+  const [showMore, setShowMore] = useState(true);
 
   // State for the slider values specifically, initialized from sidebardata
   const [values, setValues] = useState([
@@ -162,12 +162,12 @@ export default function Search() {
         const res = await fetch(`/api/listing/get?${searchQuery}`);
         const data = await res.json();
 
-        if (data.length > 8) {
-          // Check if more items might exist (assuming page size 9)
-          setShowMore(true);
-        } else {
-          setShowMore(false);
-        }
+        // if (data.length > 8) {
+        //   // Check if more items might exist (assuming page size 9)
+        //   setShowMore(true);
+        // } else {
+        //   setShowMore(false);
+        // }
         setListings(data);
       } catch (error) {
         console.error("Failed to fetch listings:", error);
@@ -263,10 +263,7 @@ export default function Search() {
     try {
       const res = await fetch(`/api/listing/get?${searchQuery}`);
       const data = await res.json();
-      if (data.length < 9) {
-        // Assuming your API returns max 9 per page
-        setShowMore(false);
-      }
+      setShowMore(false);
       setListings([...listings, ...data]); // Append new listings
     } catch (error) {
       console.error("Failed to fetch more listings:", error);

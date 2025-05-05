@@ -135,7 +135,7 @@ export const rejectListing = async (req, res, next) => {
 
 export const getListings = async (req, res, next) => {
   try {
-    const limit = parseInt(req.query.limit) || 9;
+    const limit = parseInt(req.query.limit) || 4;
     const startIndex = parseInt(req.query.startIndex) || 0;
     let offer = req.query.offer;
 
@@ -164,11 +164,11 @@ export const getListings = async (req, res, next) => {
     const propertyTypeFilter =
       req.query.propertyType && req.query.propertyType.toLowerCase() !== "all"
         ? {
-            propertyType: {
-              $regex: `^${req.query.propertyType}$`,
-              $options: "i",
-            },
-          }
+          propertyType: {
+            $regex: `^${req.query.propertyType}$`,
+            $options: "i",
+          },
+        }
         : {};
 
     const subTypeFilter =
@@ -178,8 +178,8 @@ export const getListings = async (req, res, next) => {
 
     const subSubTypeFilter =
       req.query.subSubType &&
-      req.query.subSubType.trim() !== "" &&
-      req.query.subSubType.toLowerCase() !== "all"
+        req.query.subSubType.trim() !== "" &&
+        req.query.subSubType.toLowerCase() !== "all"
         ? { subSubType: { $regex: `^${req.query.subSubType}$`, $options: "i" } }
         : {};
 
@@ -195,11 +195,8 @@ export const getListings = async (req, res, next) => {
       ? parseInt(req.query.maxPrice)
       : Number.MAX_SAFE_INTEGER;
 
-    const order = req.query.order || "desc";
-
     const listings = await Listing.find({
       name: { $regex: searchTerm, $options: "i" },
-      offer,
       furnished,
       balcony,
       parking,
@@ -212,19 +209,14 @@ export const getListings = async (req, res, next) => {
       $or: [
         {
           $and: [
-            { minPrice: { $lte: maxPrice } },
-            { maxPrice: { $gte: minPrice } },
+            { minPrice: { $gte: minPrice } },
+            { maxPrice: { $lte: maxPrice } },
           ],
         },
       ],
     })
-      .limit(limit)
-      .skip(startIndex);
-
-    // console.log("Query Filters:", { propertyTypeFilter, subTypeFilter });
-
-    // console.log("Fetched Listings from DB:", listings);
-    // console.log("Min:", minPrice, "Max:", maxPrice);
+    .limit(limit)
+    .skip(startIndex);
 
     return res.status(200).json(listings);
   } catch (error) {

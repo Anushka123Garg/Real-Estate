@@ -31,7 +31,7 @@ export default function CreateListing() {
     bathrooms: 1,
     minPrice: 0,
     maxPrice: 0,
-    offer: false,
+    // offer: false,
     parking: false,
     furnished: false,
     balcony: false,
@@ -169,8 +169,8 @@ export default function CreateListing() {
     if (
       e.target.id === "parking" ||
       e.target.id === "furnished" ||
-      e.target.id === "balcony" ||
-      e.target.id === "offer"
+      e.target.id === "balcony" 
+      // e.target.id === "offer"
     ) {
       setFormData({
         ...formData,
@@ -505,7 +505,7 @@ export default function CreateListing() {
               </>
             )}
 
-            <div className="flex gap-2">
+            {/* <div className="flex gap-2">
               <input
                 type="checkbox"
                 id="offer"
@@ -514,7 +514,7 @@ export default function CreateListing() {
                 checked={formData.offer}
               />
               <span>Offer</span>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex gap-6 flex-wrap">
@@ -561,7 +561,7 @@ export default function CreateListing() {
               />
               <div className="flex flex-col items-center">
                 <p>Min. Price</p>
-                <span className="text-xs">(₹ / month)</span>
+                {/* <span className="text-xs">(₹ / month)</span> */}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -577,7 +577,7 @@ export default function CreateListing() {
               />
               <div className="flex flex-col items-center">
                 <p>Max. Price</p>
-                <span className="text-xs">(₹ / month)</span>
+                {/* <span className="text-xs">(₹ / month)</span> */}
               </div>
             </div>
           </div>
